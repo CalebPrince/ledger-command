@@ -65,7 +65,7 @@ AUTOMATION_BASE_URL = os.environ.get("AUTOMATION_BASE_URL", "http://localhost:40
 # can be set/rotated without restarting the server. GEMINI_API_KEY/
 # GEMINI_MODEL env vars are still honored as a fallback default.
 # --------------------------------------------------------------------------
-GEMINI_MODEL_DEFAULT = os.environ.get("GEMINI_MODEL", "gemini-1.5-flash")
+GEMINI_MODEL_DEFAULT = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
 
 
 def _get_app_setting(conn, key: str) -> Optional[str]:

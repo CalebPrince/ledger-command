@@ -467,7 +467,7 @@ async function loadGeminiSettings() {
     statusLine.innerHTML = data.configured
       ? `<span class="text-accent">Configured</span> — <code>${data.masked_key}</code>, model <code>${data.model}</code>, last updated ${data.updated_at}`
       : `<span class="text-muted">Not configured yet.</span> The AI Report tool will show an error until a key is set.`;
-    document.getElementById("geminiModelInput").placeholder = data.model || "gemini-1.5-flash";
+    document.getElementById("geminiModelInput").placeholder = data.model || "gemini-2.5-flash";
   } catch (err) {
     statusLine.innerHTML = `<span class="text-danger">${err.message}</span>`;
   }
