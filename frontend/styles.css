@@ -1,0 +1,307 @@
+/* ==========================================================================
+   Ledger/Command — visual identity
+   Palette:
+     --ink        #0B1420   deep navy-black, the "closed ledger" background
+     --panel      #131F30   raised surface
+     --panel-2    #182740   raised surface, hover
+     --line       #24354D   hairline rule (like ledger paper rules)
+     --ink-text   #E7ECF3   primary text
+     --muted      #8CA0B3   secondary text
+     --accent     #E3B341   ledger-seal gold — used ONE place at a time
+     --accent-dim #7A6224   gold, dimmed for borders
+     --ok         #3FBF8F   posted / paid / active
+     --warn       #E2984A   pending / needs review
+     --danger     #E2607A   suspended / overdue
+   Type:
+     Display  -> Space Grotesk (wordmark, view titles)
+     Body     -> Inter
+     Data     -> IBM Plex Mono (figures, ids, roles)
+   Signature: the "ledger tick" mark — a hand-struck check-mark motif used
+   as the brand glyph and repeated, small, as the offcanvas active-link tick.
+   ========================================================================== */
+
+:root {
+  --ink: #0B1420;
+  --panel: #131F30;
+  --panel-2: #182740;
+  --line: #24354D;
+  --ink-text: #E7ECF3;
+  --muted: #8CA0B3;
+  --accent: #E3B341;
+  --accent-dim: #7A6224;
+  --ok: #3FBF8F;
+  --warn: #E2984A;
+  --danger: #E2607A;
+}
+
+body {
+  background: var(--ink);
+  color: var(--ink-text);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+code { color: var(--accent); }
+
+.text-accent { color: var(--accent) !important; }
+
+/* ---- Ledger wordmark / signature glyph -------------------------------- */
+.ledger-mark { display: flex; align-items: center; gap: .6rem; }
+.ledger-wordmark {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 1.5rem;
+  letter-spacing: .02em;
+}
+.ledger-wordmark.small-mark { font-size: 1.05rem; }
+.ledger-tick {
+  width: 28px; height: 28px;
+  position: relative;
+  display: inline-block;
+}
+.ledger-tick::before {
+  content: "";
+  position: absolute;
+  left: 4px; top: 13px;
+  width: 8px; height: 3px;
+  background: var(--accent);
+  transform: rotate(45deg);
+  border-radius: 2px;
+}
+.ledger-tick::after {
+  content: "";
+  position: absolute;
+  left: 9px; top: 6px;
+  width: 3px; height: 18px;
+  background: var(--accent);
+  transform: rotate(45deg);
+  border-radius: 2px;
+}
+
+/* ---- Login screen ------------------------------------------------------ */
+.login-screen {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(227,179,65,0.06), transparent 40%),
+    repeating-linear-gradient(180deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 42px),
+    var(--ink);
+}
+.login-card {
+  width: 100%;
+  max-width: 380px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 2.5rem 2rem;
+}
+.login-sub { color: var(--muted); font-size: .95rem; }
+
+.form-control, .form-select {
+  background: var(--ink);
+  border: 1px solid var(--line);
+  color: var(--ink-text);
+}
+.form-control:focus, .form-select:focus {
+  background: var(--ink);
+  color: var(--ink-text);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(227,179,65,0.15);
+}
+.form-control::placeholder { color: #4E607A; }
+
+.btn-accent {
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  color: #14100A;
+  font-weight: 600;
+}
+.btn-accent:hover { background: #F0C463; border-color: #F0C463; color: #14100A; }
+
+.btn-icon {
+  background: transparent;
+  border: none;
+  color: var(--ink-text);
+}
+.btn-icon:hover { color: var(--accent); }
+
+/* ---- Top bar ------------------------------------------------------------ */
+.topbar {
+  height: 60px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+  position: sticky; top: 0; z-index: 1030;
+}
+
+.role-pill {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  padding: .3rem .6rem;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
+.role-pill.role-super_admin { color: var(--accent); border-color: var(--accent-dim); }
+.role-pill.role-admin { color: #7FA8E8; border-color: #2C3F63; }
+.role-pill.role-employee { color: var(--ok); border-color: #1F4A3B; }
+.role-pill.role-client { color: var(--muted); border-color: var(--line); }
+
+/* ---- Sidebar / offcanvas nav -------------------------------------------- */
+.side-nav {
+  background: var(--panel);
+  border-right: 1px solid var(--line);
+  width: 250px;
+}
+@media (min-width: 992px) {
+  .side-nav { min-height: calc(100vh - 60px); }
+}
+.nav-links { padding: 1rem 0; }
+.nav-links .nav-link {
+  color: var(--muted);
+  padding: .7rem 1.25rem;
+  font-size: .92rem;
+  display: flex; align-items: center; gap: .7rem;
+  border-left: 3px solid transparent;
+  cursor: pointer;
+}
+.nav-links .nav-link:hover { color: var(--ink-text); background: var(--panel-2); }
+.nav-links .nav-link.active {
+  color: var(--ink-text);
+  background: var(--panel-2);
+  border-left-color: var(--accent);
+}
+.nav-footer { border-top: 1px solid var(--line); }
+
+/* ---- Main content -------------------------------------------------------- */
+.view-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+}
+.panel-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.panel-card .card-header {
+  background: transparent;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: .85rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.table-dark {
+  --bs-table-bg: transparent;
+  --bs-table-color: var(--ink-text);
+}
+.table-dark thead th {
+  color: var(--muted);
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  border-bottom: 1px solid var(--line);
+  font-weight: 500;
+}
+.table-dark td, .table-dark th { border-color: var(--line); font-size: .9rem; }
+.table-dark tbody tr:hover { background: var(--panel-2); }
+
+.stat-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 1.2rem;
+}
+.stat-card .stat-value {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+.stat-card .stat-label {
+  color: var(--muted);
+  font-size: .78rem;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+.status-badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: .7rem;
+  text-transform: uppercase;
+  padding: .2rem .55rem;
+  border-radius: 20px;
+  border: 1px solid;
+}
+.status-badge.active { color: var(--ok); border-color: #1F4A3B; }
+.status-badge.suspended { color: var(--danger); border-color: #4A2430; }
+.status-badge.unread, .status-badge.needs_review, .status-badge.unpaid { color: var(--warn); border-color: #4A3620; }
+.status-badge.resolved, .status-badge.cleared, .status-badge.paid, .status-badge.completed { color: var(--ok); border-color: #1F4A3B; }
+.status-badge.overdue { color: var(--danger); border-color: #4A2430; }
+.status-badge.paused { color: var(--muted); border-color: var(--line); }
+
+.upload-dropzone {
+  border: 2px dashed var(--line);
+  border-radius: 12px;
+  color: var(--muted);
+  transition: border-color .15s;
+}
+.upload-dropzone:hover { border-color: var(--accent); cursor: pointer; }
+
+.modal-content {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--ink-text);
+}
+.modal-header, .modal-footer { border-color: var(--line); }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--ink); }
+::-webkit-scrollbar-thumb { background: var(--line); border-radius: 6px; }
+
+/* ---- Messaging thread ---------------------------------------------------- */
+.message-thread {
+  max-height: 320px;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: .75rem;
+  background: var(--ink);
+}
+.message-bubble {
+  max-width: 80%;
+  padding: .5rem .8rem;
+  border-radius: 10px;
+  margin-bottom: .5rem;
+  font-size: .88rem;
+  border: 1px solid var(--line);
+}
+.message-bubble.mine { margin-left: auto; background: var(--panel-2); border-color: var(--accent-dim); }
+.message-bubble .meta { color: var(--muted); font-size: .7rem; text-transform: uppercase; letter-spacing: .04em; margin-bottom: .2rem; }
+
+/* ---- Manage Client modal tabs -------------------------------------------- */
+#manageClientTabs .nav-link { color: var(--muted); background: transparent; border-color: var(--line); }
+#manageClientTabs .nav-link.active { color: var(--ink-text); background: var(--panel-2); border-color: var(--line) var(--line) var(--panel-2); }
+.manage-tab-pane { min-height: 200px; }
+
+/* ---- Composio scope rows -------------------------------------------------- */
+.scope-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .6rem 0; border-bottom: 1px solid var(--line);
+}
+.scope-row:last-child { border-bottom: none; }
+
+/* ---- AI suggestion cards --------------------------------------------------- */
+.suggestion-card {
+  background: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: .85rem 1rem;
+  margin-bottom: .75rem;
+}
+.suggestion-card:last-child { margin-bottom: 0; }
+.suggestion-card .suggestion-type {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--accent);
+}

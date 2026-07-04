@@ -1,0 +1,295 @@
+/* ==========================================================================
+   marketing.css — landing + registration pages
+   Extends the Ledger/Command tokens defined in styles.css. No new palette:
+   same ink/panel/gold system, same type stack (Space Grotesk / Inter /
+   IBM Plex Mono). This file only adds layout + the marketing-only signature
+   moment (the "clearance stamp" reveal on the role cards).
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+}
+
+.marketing-body {
+  background: var(--ink);
+}
+
+/* ---- Marketing nav ------------------------------------------------------ */
+.marketing-nav {
+  height: 64px;
+  background: rgba(11, 20, 32, 0.85);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+}
+
+/* ---- Hero ----------------------------------------------------------------*/
+.hero {
+  background:
+    radial-gradient(circle at 15% 10%, rgba(227, 179, 65, 0.08), transparent 42%),
+    radial-gradient(circle at 85% 0%, rgba(127, 168, 232, 0.05), transparent 38%),
+    repeating-linear-gradient(180deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 42px),
+    var(--ink);
+  padding: 5.5rem 0 4rem;
+}
+
+.eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: .74rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.hero h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: clamp(2.1rem, 4.4vw, 3.4rem);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+.hero-sub {
+  color: var(--muted);
+  font-size: 1.08rem;
+  max-width: 42ch;
+}
+
+.hero-visual {
+  animation: rise-in .7s ease-out both;
+  animation-delay: .1s;
+}
+
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Mini nav-preview cards inside the hero, one per role — a real 2x2 grid
+   so cell heights are independent per row and cards can never overlap,
+   regardless of how much text each role's nav list wraps to. */
+.nav-preview-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  align-items: stretch;
+}
+.nav-preview {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 1rem 1.1rem;
+  min-height: 100%;
+}
+@media (max-width: 480px) {
+  .nav-preview-grid { grid-template-columns: 1fr; }
+}
+.nav-preview .np-role {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: .68rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  margin-bottom: .65rem;
+}
+.nav-preview ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.nav-preview li {
+  font-size: .82rem;
+  color: var(--ink-text);
+  padding: .32rem 0;
+  border-left: 2px solid transparent;
+  padding-left: .6rem;
+  opacity: .92;
+}
+.nav-preview li.dim {
+  color: var(--muted);
+  opacity: .45;
+  text-decoration: line-through;
+}
+.nav-preview.np-super_admin li:not(.dim),
+.nav-preview.np-admin li:not(.dim) { border-left-color: var(--accent-dim); }
+.nav-preview.np-employee li:not(.dim) { border-left-color: #1F4A3B; }
+.nav-preview.np-client li:not(.dim) { border-left-color: var(--line); }
+
+/* ---- Section shell -------------------------------------------------------*/
+.section {
+  padding: 4.5rem 0;
+  border-top: 1px solid var(--line);
+}
+.section-eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: .72rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.section-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: clamp(1.5rem, 2.6vw, 2.1rem);
+}
+
+/* ---- Clearance / role stamp cards ----------------------------------------*/
+.clearance-card {
+  position: relative;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 1.6rem 1.5rem 1.8rem;
+  height: 100%;
+  overflow: hidden;
+  transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+.clearance-card:hover,
+.clearance-card:focus-within {
+  transform: translateY(-5px);
+  border-color: var(--accent-dim);
+  box-shadow: 0 14px 34px -18px rgba(227, 179, 65, 0.35);
+}
+.clearance-rank {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: .7rem;
+  letter-spacing: .08em;
+  color: var(--muted);
+  margin-bottom: .9rem;
+}
+.clearance-rank span { color: var(--accent); }
+.clearance-card h5 {
+  font-family: 'Space Grotesk', sans-serif;
+  margin-bottom: .3rem;
+}
+.clearance-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+  font-size: .87rem;
+  color: var(--muted);
+}
+.clearance-card ul li {
+  padding: .3rem 0;
+  border-bottom: 1px dashed var(--line);
+}
+.clearance-card ul li:last-child { border-bottom: none; }
+
+/* The "AUTHORIZED" ink-stamp signature element: hidden until hover/focus */
+.stamp {
+  position: absolute;
+  top: 1.1rem;
+  right: 1.1rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: .62rem;
+  letter-spacing: .1em;
+  color: var(--accent);
+  border: 1.5px solid var(--accent);
+  border-radius: 6px;
+  padding: .18rem .5rem;
+  transform: rotate(-9deg) scale(.85);
+  opacity: 0;
+  transition: opacity .2s ease, transform .2s ease;
+  pointer-events: none;
+}
+.clearance-card:hover .stamp,
+.clearance-card:focus-within .stamp {
+  opacity: 1;
+  transform: rotate(-9deg) scale(1);
+}
+
+/* ---- Three-layer trust section -------------------------------------------*/
+.layer-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: .78rem;
+  color: var(--accent);
+  letter-spacing: .08em;
+}
+.layer-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 1.75rem;
+  height: 100%;
+}
+.layer-card h5 { font-family: 'Space Grotesk', sans-serif; }
+.layer-card p { color: var(--muted); font-size: .92rem; margin-bottom: 0; }
+
+/* ---- Compliance receipt (plain-language audit entry, not code) -----------*/
+.compliance-receipt {
+  background: #0F1B2B;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 1.4rem 1.6rem;
+}
+.cr-header {
+  border-bottom: 1px dashed var(--line);
+  padding-bottom: .8rem;
+  margin-bottom: .8rem;
+}
+.cr-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+}
+.cr-row {
+  display: flex;
+  gap: 1.5rem;
+  padding: .55rem 0;
+  border-bottom: 1px dashed var(--line);
+}
+.cr-row:last-child { border-bottom: none; }
+.cr-label {
+  flex: 0 0 160px;
+  color: var(--muted);
+  font-size: .82rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.cr-value {
+  color: var(--ink-text);
+  font-size: .94rem;
+}
+@media (max-width: 576px) {
+  .cr-row { flex-direction: column; gap: .25rem; }
+  .cr-label { flex: none; }
+}
+
+/* ---- Final CTA band --------------------------------------------------------*/
+.cta-band {
+  background:
+    linear-gradient(180deg, rgba(227,179,65,0.05), transparent),
+    var(--panel);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 4rem 0;
+  text-align: center;
+}
+
+.marketing-footer {
+  padding: 2.5rem 0;
+  color: var(--muted);
+  font-size: .85rem;
+}
+.marketing-footer a { color: var(--muted); text-decoration: none; }
+.marketing-footer a:hover { color: var(--accent); }
+
+/* ---- Registration page ----------------------------------------------------*/
+.register-card { max-width: 460px; }
+.plan-note {
+  font-size: .78rem;
+  color: var(--muted);
+}
+
+#registerTabs .nav-link {
+  color: var(--muted);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  font-size: .82rem;
+}
+#registerTabs .nav-link.active {
+  color: #14100A;
+  background: var(--accent);
+  border-color: var(--accent);
+}

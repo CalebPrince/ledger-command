@@ -1,0 +1,13 @@
+{
+  "name": "accounting-command-center-automation",
+  "version": "1.0.0",
+  "description": "Node.js automation/execution layer with RBAC-scoped Composio action dispatch and compliance audit logging.",
+  "main": "automation.js",
+  "scripts": {
+    "start": "node automation.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "node-fetch": "^2.7.0"
+  }
+}

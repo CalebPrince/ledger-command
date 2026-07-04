@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ledger&nbsp;Command &mdash; Accounting Command Center</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+<!-- ======================= LOGIN SCREEN ======================= -->
+<div id="loginScreen" class="login-screen d-flex align-items-center justify-content-center">
+  <div class="login-card">
+    <a href="/" class="d-inline-flex text-decoration-none">
+      <div class="ledger-mark mb-4">
+        <span class="ledger-tick"></span>
+        <span class="ledger-wordmark">LEDGER<span class="text-accent">/</span>COMMAND</span>
+      </div>
+    </a>
+    <p class="login-sub mb-4">Sign in to your firm workspace.</p>
+
+    <form id="loginForm" novalidate>
+      <div class="mb-3">
+        <label class="form-label small text-uppercase text-muted">Email</label>
+        <input type="email" class="form-control form-control-lg" id="loginEmail" placeholder="you@firm.com" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label small text-uppercase text-muted">Password</label>
+        <input type="password" class="form-control form-control-lg" id="loginPassword" placeholder="••••••••" required>
+      </div>
+      <div id="loginError" class="alert alert-danger py-2 small d-none"></div>
+      <button type="submit" class="btn btn-accent btn-lg w-100 mt-2">Sign In</button>
+    </form>
+    <p class="text-muted small mt-4 mb-1">
+      New firm? <a href="/register" class="text-accent text-decoration-none">Create an account</a>
+    </p>
+    <p class="text-muted small mb-0">
+      Default Super Admin: <code>superadmin@firm.com</code> / <code>ChangeMe123!</code>
+    </p>
+  </div>
+</div>
+
+<!-- ======================= APP SHELL ======================= -->
+<div id="appShell" class="d-none">
+
+  <!-- Top bar -->
+  <nav class="topbar d-flex align-items-center justify-content-between px-3">
+    <div class="d-flex align-items-center gap-2">
+      <button class="btn btn-icon d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sideNav">
+        <i class="bi bi-list fs-4"></i>
+      </button>
+      <span class="ledger-wordmark small-mark">LEDGER<span class="text-accent">/</span>COMMAND</span>
+      <span class="text-muted small ms-2 d-none d-md-inline" id="companyNameLabel"></span>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+      <span class="role-pill" id="rolePill">—</span>
+      <div class="dropdown">
+        <button class="btn btn-icon dropdown-toggle" data-bs-toggle="dropdown">
+          <i class="bi bi-person-circle fs-5"></i>
+          <span class="d-none d-sm-inline ms-1" id="userNameLabel"></span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li><span class="dropdown-item-text small text-muted" id="userEmailLabel"></span></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><button class="dropdown-item" id="logoutBtn"><i class="bi bi-box-arrow-right me-2"></i>Sign Out</button></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="d-flex">
+
+    <!-- Offcanvas / sidebar nav (dynamic per role) -->
+    <div class="offcanvas-lg offcanvas-start side-nav" tabindex="-1" id="sideNav">
+      <div class="offcanvas-header d-lg-none">
+        <span class="ledger-wordmark small-mark">LEDGER<span class="text-accent">/</span>COMMAND</span>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" data-bs-target="#sideNav"></button>
+      </div>
+      <div class="offcanvas-body d-flex flex-column p-0">
+        <ul class="nav flex-column nav-links" id="navLinks"><!-- injected by app.js --></ul>
+        <div class="mt-auto p-3 nav-footer small text-muted">
+          Composio scopes active<br>
+          <span class="text-accent" id="composioStatus">● Connected</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main content -->
+    <main class="main-content flex-grow-1 p-3 p-lg-4">
+
+      <!-- ---------- VIEW: Dashboard (Admin/Super Admin/Employee) ---------- -->
+      <section id="view-dashboard" class="view d-none">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h4 class="view-title mb-0">Firm Dashboard</h4>
+        </div>
+        <div class="row g-3 mb-4" id="statCards"></div>
+        <div class="card panel-card">
+          <div class="card-header">Recent Activity</div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-dark table-hover mb-0 align-middle">
+                <thead><tr><th>Actor</th><th>Action</th><th>Detail</th><th>When</th></tr></thead>
+                <tbody id="dashboardActivityBody"><tr><td colspan="4" class="text-muted text-center py-4">Loading…</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- VIEW: User Management (Admin/Super Admin only) ---------- -->
+      <section id="view-users" class="view d-none">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+          <h4 class="view-title mb-0">User Management</h4>
+          <button class="btn btn-accent" data-bs-toggle="modal" data-bs-target="#createUserModal">
+            <i class="bi bi-person-plus me-2"></i>Create New User
+          </button>
+        </div>
+        <div class="card panel-card">
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-dark table-hover mb-0 align-middle">
+                <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
+                <tbody id="usersTableBody"><tr><td colspan="5" class="text-muted text-center py-4">Loading…</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- VIEW: Master Audit Logs (Admin/Super Admin only) ---------- -->
+      <section id="view-audit" class="view d-none">
+        <h4 class="view-title mb-4">Master Audit Logs</h4>
+        <div class="card panel-card">
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-dark table-hover mb-0 align-middle">
+                <thead><tr><th>Actor Role</th><th>Actor ID</th><th>Action</th><th>Detail</th><th>Timestamp</th></tr></thead>
+                <tbody id="auditTableBody"><tr><td colspan="5" class="text-muted text-center py-4">Loading…</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- VIEW: Global Settings (Admin + Super Admin) ---------- -->
+      <section id="view-settings" class="view d-none">
+        <h4 class="view-title mb-4">Global Settings</h4>
+        <div class="card panel-card p-4 mb-3">
+          <p class="text-muted">Firm-wide configuration — Composio API scopes, billing plan, and system-level toggles.</p>
+          <div class="row g-3" id="globalAnalyticsCards"></div>
+        </div>
+        <div class="card panel-card p-4 mb-3">
+          <h6 class="mb-1">Composio API Scopes</h6>
+          <p class="text-muted small mb-3">
+            Toggling a scope dispatches through the Node automation layer, which independently
+            re-checks your role before touching Composio. High-level scopes require Admin rank or above.
+          </p>
+          <div id="composioScopesList"><p class="text-muted">Loading…</p></div>
+        </div>
+
+        <div class="card panel-card p-4 d-none" id="geminiSettingsCard">
+          <h6 class="mb-1">AI Integration (Gemini)</h6>
+          <p class="text-muted small mb-3">
+            Powers the AI Report and AI Suggestions tools. Stored server-side and can be rotated
+            here any time — no server restart needed. Super Admin only.
+          </p>
+          <p class="mb-3" id="geminiStatusLine"></p>
+          <form id="geminiSettingsForm" class="row g-2">
+            <div class="col-12 col-md-6">
+              <label class="form-label small text-uppercase text-muted">Gemini API Key</label>
+              <input type="password" class="form-control" id="geminiApiKeyInput" placeholder="Enter to set or replace" autocomplete="off">
+            </div>
+            <div class="col-12 col-md-4">
+              <label class="form-label small text-uppercase text-muted">Model <span class="text-muted">(optional)</span></label>
+              <input type="text" class="form-control" id="geminiModelInput" placeholder="gemini-1.5-flash">
+            </div>
+            <div class="col-12 col-md-2 d-flex align-items-end">
+              <button type="submit" class="btn btn-accent w-100">Save</button>
+            </div>
+          </form>
+          <div id="geminiSettingsError" class="alert alert-danger py-2 small mt-3 d-none"></div>
+          <div id="geminiSettingsSuccess" class="alert alert-success py-2 small mt-3 d-none"></div>
+        </div>
+      </section>
+
+      <!-- ---------- VIEW: Overview (Employee) ---------- -->
+      <section id="view-employee-overview" class="view d-none">
+        <h4 class="view-title mb-4">Overview</h4>
+        <div class="row g-3" id="employeeOverviewCards"></div>
+      </section>
+
+      <!-- ---------- VIEW: Assigned Clients (Employee) ---------- -->
+      <section id="view-assigned-clients" class="view d-none">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+          <h4 class="view-title mb-0">Assigned Clients</h4>
+          <button class="btn btn-accent d-none" id="addOwnClientBtn" data-bs-toggle="modal" data-bs-target="#addOwnClientModal">
+            <i class="bi bi-person-plus me-2"></i>Add Client
+          </button>
+        </div>
+        <div class="card panel-card">
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-dark table-hover mb-0 align-middle">
+                <thead><tr><th>Client</th><th>Email</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
+                <tbody id="assignedClientsBody"><tr><td colspan="4" class="text-muted text-center py-4">Loading…</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- VIEW: Smart Inbox (Employee, scoped) ---------- -->
+      <section id="view-inbox" class="view d-none">
+        <h4 class="view-title mb-4">Smart Inbox <span class="text-muted small">(your assigned clients only)</span></h4>
+        <div class="card panel-card">
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-dark table-hover mb-0 align-middle">
+                <thead><tr><th>Client</th><th>Subject</th><th>Status</th><th>Received</th></tr></thead>
+                <tbody id="inboxTableBody"><tr><td colspan="4" class="text-muted text-center py-4">Loading…</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- VIEW: Data Cleaner (Employee, scoped) ---------- -->
+      <section id="view-data-cleaner" class="view d-none">
+        <h4 class="view-title mb-4">Data Cleaner <span class="text-muted small">(your assigned clients only)</span></h4>
+        <div class="card panel-card">
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-dark table-hover mb-0 align-middle">
+                <thead><tr><th>Client</th><th>Row</th><th>Flag</th></tr></thead>
+                <tbody id="dataCleanBody"><tr><td colspan="3" class="text-muted text-center py-4">Loading…</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- VIEW: Collections / Chaser Campaigns (Employee) ---------- -->
+      <section id="view-collections" class="view d-none">
+        <h4 class="view-title mb-4">Collections &amp; Chaser Campaigns <span class="text-muted small">(your assigned clients only)</span></h4>
+        <div class="card panel-card mb-3">
+          <div class="card-header">Outstanding Invoices</div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-dark table-hover mb-0 align-middle">
+                <thead><tr><th>Client</th><th>Invoice</th><th>Amount</th><th>Status</th><th>Due</th><th class="text-end">Action</th></tr></thead>
+                <tbody id="collectionsInvoicesBody"><tr><td colspan="6" class="text-muted text-center py-4">Loading…</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="card panel-card">
+          <div class="card-header">Chaser Campaign History</div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-dark table-hover mb-0 align-middle">
+                <thead><tr><th>Client</th><th>Status</th><th>Notes</th><th>Last Chased</th><th class="text-end">Action</th></tr></thead>
+                <tbody id="collectionsCampaignsBody"><tr><td colspan="5" class="text-muted text-center py-4">Loading…</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- VIEW: Personal Settings (Employee) ---------- -->
+      <section id="view-personal-settings" class="view d-none">
+        <h4 class="view-title mb-4">Personal Settings</h4>
+        <div class="card panel-card p-4 mb-3">
+          <p class="text-muted mb-1">Signed in as</p>
+          <p class="mb-0"><strong id="personalSettingsName"></strong> — <span id="personalSettingsEmail"></span></p>
+        </div>
+        <div class="card panel-card p-4">
+          <h6 class="mb-3">Change Password</h6>
+          <form id="changePasswordForm">
+            <div id="changePasswordError" class="alert alert-danger py-2 small d-none"></div>
+            <div id="changePasswordSuccess" class="alert alert-success py-2 small d-none"></div>
+            <div class="mb-3">
+              <label class="form-label small text-uppercase text-muted">Current Password</label>
+              <input type="password" class="form-control" id="currentPassword" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small text-uppercase text-muted">New Password</label>
+              <input type="password" class="form-control" id="newPassword" minlength="6" required>
+            </div>
+            <button type="submit" class="btn btn-accent">Update Password</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- ---------- VIEW: Overview (Client) ---------- -->
+      <section id="view-client-overview" class="view d-none">
+        <h4 class="view-title mb-4">Overview</h4>
+        <div class="row g-3 mb-3" id="clientOverviewCards"></div>
+        <div class="card panel-card p-4" id="clientOverviewOfficerCard"></div>
+      </section>
+
+      <!-- ---------- VIEW: Client Upload Center ---------- -->
+      <section id="view-upload" class="view d-none">
+        <h4 class="view-title mb-4">Upload Center</h4>
+        <div class="card panel-card p-4 mb-3">
+          <p class="text-muted">Drop your statements, receipts, or requested documents here.</p>
+          <form id="uploadForm">
+            <label class="upload-dropzone text-center p-5 d-block" for="uploadFileInput" style="cursor:pointer;">
+              <i class="bi bi-cloud-arrow-up fs-1 text-accent"></i>
+              <p class="mb-0 mt-2" id="uploadDropzoneLabel">Click to choose a file</p>
+            </label>
+            <input type="file" id="uploadFileInput" class="d-none">
+            <div id="uploadError" class="alert alert-danger py-2 small mt-3 d-none"></div>
+            <button type="submit" class="btn btn-accent mt-3" id="uploadSubmitBtn" disabled>Upload File</button>
+          </form>
+        </div>
+        <div class="card panel-card">
+          <div class="card-header">Your Uploaded Documents</div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-dark table-hover mb-0 align-middle">
+                <thead><tr><th>File</th><th>Size</th><th>Uploaded</th><th class="text-end">Action</th></tr></thead>
+                <tbody id="documentsBody"><tr><td colspan="4" class="text-muted text-center py-4">Loading…</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- VIEW: Document Checklist (Client) ---------- -->
+      <section id="view-checklist" class="view d-none">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+          <h4 class="view-title mb-0">Document Checklist</h4>
+          <span class="text-muted small" id="checklistProgress"></span>
+        </div>
+        <div class="card panel-card p-4" id="checklistCard"></div>
+      </section>
+
+      <!-- ---------- VIEW: Invoices (Client) ---------- -->
+      <section id="view-invoices" class="view d-none">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+          <h4 class="view-title mb-0">Invoices</h4>
+          <span class="text-muted small" id="invoicesTotalDue"></span>
+        </div>
+        <div class="card panel-card">
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-dark table-hover mb-0 align-middle">
+                <thead><tr><th>Invoice</th><th>Amount</th><th>Status</th><th>Due</th><th class="text-end">Action</th></tr></thead>
+                <tbody id="invoicesBody"><tr><td colspan="5" class="text-muted text-center py-4">No invoices yet.</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- VIEW: Contact Officer (Client) ---------- -->
+      <section id="view-contact-officer" class="view d-none">
+        <h4 class="view-title mb-4">Contact Officer</h4>
+        <div class="card panel-card p-4 mb-3" id="contactOfficerCard"></div>
+        <div class="card panel-card p-3 d-none" id="messageThreadCard">
+          <h6 class="mb-3">Communications History</h6>
+          <div id="messageThreadBody" class="message-thread mb-3"></div>
+          <form id="messageForm" class="d-flex gap-2">
+            <input type="text" class="form-control" id="messageInput" placeholder="Type a message…" required>
+            <button type="submit" class="btn btn-accent"><i class="bi bi-send"></i></button>
+          </form>
+        </div>
+      </section>
+
+      <!-- ---------- VIEW: Personal Settings (Client) ---------- -->
+      <section id="view-client-settings" class="view d-none">
+        <h4 class="view-title mb-4">Personal Settings</h4>
+        <div class="card panel-card p-4 mb-3">
+          <p class="text-muted mb-1">Signed in as</p>
+          <p class="mb-0"><strong id="clientSettingsName"></strong> — <span id="clientSettingsEmail"></span></p>
+        </div>
+        <div class="card panel-card p-4">
+          <h6 class="mb-3">Change Password</h6>
+          <form id="clientChangePasswordForm">
+            <div id="clientChangePasswordError" class="alert alert-danger py-2 small d-none"></div>
+            <div id="clientChangePasswordSuccess" class="alert alert-success py-2 small d-none"></div>
+            <div class="mb-3">
+              <label class="form-label small text-uppercase text-muted">Current Password</label>
+              <input type="password" class="form-control" id="clientCurrentPassword" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small text-uppercase text-muted">New Password</label>
+              <input type="password" class="form-control" id="clientNewPassword" minlength="6" required>
+            </div>
+            <button type="submit" class="btn btn-accent">Update Password</button>
+          </form>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ======================= MODAL: Create New User ======================= -->
+<div class="modal fade" id="createUserModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="createUserForm">
+        <div class="modal-header">
+          <h5 class="modal-title">Create New User</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div id="createUserError" class="alert alert-danger py-2 small d-none"></div>
+          <div class="mb-3">
+            <label class="form-label small text-uppercase text-muted">Full Name</label>
+            <input type="text" class="form-control" id="newUserName" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small text-uppercase text-muted">Email</label>
+            <input type="email" class="form-control" id="newUserEmail" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small text-uppercase text-muted">Password</label>
+            <input type="password" class="form-control" id="newUserPassword" minlength="6" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small text-uppercase text-muted">Role</label>
+            <select class="form-select" id="newUserRole" required>
+              <option value="super_admin">Super Admin</option>
+              <option value="admin">Admin</option>
+              <option value="employee">Employee</option>
+              <option value="client" selected>Client</option>
+            </select>
+          </div>
+          <div class="mb-1" id="assignOfficerWrap">
+            <label class="form-label small text-uppercase text-muted">Assign to Officer <span class="text-muted">(optional, clients only)</span></label>
+            <select class="form-select" id="assignOfficerSelect">
+              <option value="">— Unassigned —</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-accent">Create User</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ======================= MODAL: Modify Account ======================= -->
+<div class="modal fade" id="modifyUserModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="modifyUserForm">
+        <input type="hidden" id="modifyUserId">
+        <div class="modal-header">
+          <h5 class="modal-title">Modify Account</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div id="modifyUserError" class="alert alert-danger py-2 small d-none"></div>
+          <div class="mb-3">
+            <label class="form-label small text-uppercase text-muted">Full Name</label>
+            <input type="text" class="form-control" id="modifyUserName">
+          </div>
+          <div class="mb-3">
+            <label class="form-label small text-uppercase text-muted">Email</label>
+            <input type="email" class="form-control" id="modifyUserEmail">
+          </div>
+          <div class="mb-3">
+            <label class="form-label small text-uppercase text-muted">Role</label>
+            <select class="form-select" id="modifyUserRole">
+              <option value="super_admin">Super Admin</option>
+              <option value="admin">Admin</option>
+              <option value="employee">Employee</option>
+              <option value="client">Client</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small text-uppercase text-muted">Account Status</label>
+            <select class="form-select" id="modifyUserStatus">
+              <option value="active">Active</option>
+              <option value="suspended">Suspended</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-accent">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ======================= MODAL: Reset Password (Admin/Super Admin) ======================= -->
+<div class="modal fade" id="resetPasswordModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="resetPasswordForm">
+        <input type="hidden" id="resetPasswordUserId">
+        <div class="modal-header">
+          <h5 class="modal-title">Reset Password — <span id="resetPasswordUserName"></span></h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div id="resetPasswordError" class="alert alert-danger py-2 small d-none"></div>
+          <div class="mb-1">
+            <label class="form-label small text-uppercase text-muted">New Password</label>
+            <input type="password" class="form-control" id="resetPasswordNewValue" minlength="6" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-accent">Reset Password</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ======================= MODAL: Add Client (independent Employee only) ======================= -->
+<div class="modal fade" id="addOwnClientModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="addOwnClientForm">
+        <div class="modal-header">
+          <h5 class="modal-title">Add Client</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="text-muted small">This client will be created and assigned to you directly.</p>
+          <div id="addOwnClientError" class="alert alert-danger py-2 small d-none"></div>
+          <div class="mb-3">
+            <label class="form-label small text-uppercase text-muted">Full Name</label>
+            <input type="text" class="form-control" id="ownClientName" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small text-uppercase text-muted">Email</label>
+            <input type="email" class="form-control" id="ownClientEmail" required>
+          </div>
+          <div class="mb-1">
+            <label class="form-label small text-uppercase text-muted">Password</label>
+            <input type="password" class="form-control" id="ownClientPassword" minlength="6" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-accent">Create Client</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ======================= MODAL: Manage Client (Employee/Admin/Super Admin) ======================= -->
+<div class="modal fade" id="manageClientModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Manage Client — <span id="manageClientName"></span></h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <ul class="nav nav-tabs mb-3" id="manageClientTabs">
+          <li class="nav-item"><button class="nav-link active" data-tab="checklist" type="button">Checklist</button></li>
+          <li class="nav-item"><button class="nav-link" data-tab="invoices" type="button">Invoices</button></li>
+          <li class="nav-item"><button class="nav-link" data-tab="documents" type="button">Documents</button></li>
+          <li class="nav-item"><button class="nav-link" data-tab="ai-suggestions" type="button">AI Suggestions</button></li>
+          <li class="nav-item"><button class="nav-link" data-tab="ai-report" type="button">AI Report</button></li>
+          <li class="nav-item"><button class="nav-link" data-tab="messages" type="button">Messages</button></li>
+        </ul>
+
+        <div class="manage-tab-pane" id="manageTab-checklist">
+          <form id="manageChecklistForm" class="d-flex gap-2 mb-3">
+            <input type="text" class="form-control" id="manageChecklistLabel" placeholder="New checklist item…" required>
+            <button type="submit" class="btn btn-accent">Add</button>
+          </form>
+          <ul class="list-unstyled mb-0" id="manageChecklistList"></ul>
+        </div>
+
+        <div class="manage-tab-pane d-none" id="manageTab-invoices">
+          <form id="manageInvoiceForm" class="row g-2 mb-3">
+            <div class="col-6 col-md-3"><input type="text" class="form-control" id="manageInvoiceNumber" placeholder="Invoice #" required></div>
+            <div class="col-6 col-md-3"><input type="number" step="0.01" min="0.01" class="form-control" id="manageInvoiceAmount" placeholder="Amount ($)" required></div>
+            <div class="col-6 col-md-3"><input type="date" class="form-control" id="manageInvoiceDue" required></div>
+            <div class="col-6 col-md-3"><button type="submit" class="btn btn-accent w-100">Create</button></div>
+          </form>
+          <div class="table-responsive">
+            <table class="table table-dark table-hover mb-0 align-middle">
+              <thead><tr><th>Invoice</th><th>Amount</th><th>Status</th><th>Due</th></tr></thead>
+              <tbody id="manageInvoicesBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="manage-tab-pane d-none" id="manageTab-documents">
+          <div class="table-responsive">
+            <table class="table table-dark table-hover mb-0 align-middle">
+              <thead><tr><th>File</th><th>Size</th><th>Uploaded</th><th class="text-end">Action</th></tr></thead>
+              <tbody id="manageDocumentsBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="manage-tab-pane d-none" id="manageTab-ai-suggestions">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <p class="text-muted small mb-0">Simulated AI scan of this client's data — nothing is applied until you approve it.</p>
+            <button type="button" class="btn btn-sm btn-accent" id="runAiScanBtn">Run AI Scan</button>
+          </div>
+          <div id="manageAiSuggestionsList"></div>
+        </div>
+
+        <div class="manage-tab-pane d-none" id="manageTab-ai-report">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <p class="text-muted small mb-0">Real Gemini-generated summary from this client's actual data.</p>
+            <button type="button" class="btn btn-sm btn-accent" id="generateAiReportBtn">Generate Report</button>
+          </div>
+          <div id="manageAiReportBody" class="text-muted small">No report generated yet.</div>
+        </div>
+
+        <div class="manage-tab-pane d-none" id="manageTab-messages">
+          <div id="manageMessageThread" class="message-thread mb-3"></div>
+          <form id="manageMessageForm" class="d-flex gap-2">
+            <input type="text" class="form-control" id="manageMessageInput" placeholder="Type a message…" required>
+            <button type="submit" class="btn btn-accent"><i class="bi bi-send"></i></button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>

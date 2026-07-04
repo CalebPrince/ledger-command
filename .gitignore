@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Runtime SQLite database (auto-created + seeded on first run, contains local test data)
+backend/*.db
+
+# Client-uploaded files (user data, not source)
+backend/uploads/
+
+# Node
+automation/node_modules/
+
+# Compliance audit log (generated at runtime)
+automation/compliance_audit_log.jsonl
+
+# Environment / secrets
+.env
+.env.*
+
+# Claude Code local dev tooling
+.claude/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db

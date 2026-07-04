@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ledger&nbsp;Command &mdash; RBAC Command Center for Accounting Firms</title>
+<meta name="description" content="One firm ledger, four clearances. Super Admin, Admin, Employee, and Client each see exactly their own scope — enforced in the UI, the API, and every automation call.">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/styles.css">
+<link rel="stylesheet" href="/static/marketing.css">
+</head>
+<body class="marketing-body">
+
+<!-- ======================= NAV ======================= -->
+<nav class="marketing-nav d-flex align-items-center justify-content-between px-3 px-lg-5">
+  <div class="ledger-mark">
+    <span class="ledger-tick"></span>
+    <span class="ledger-wordmark small-mark">LEDGER<span class="text-accent">/</span>COMMAND</span>
+  </div>
+  <div class="d-flex align-items-center gap-2 gap-lg-3">
+    <a href="/login" class="btn btn-icon d-none d-sm-inline-flex">Sign In</a>
+    <a href="/register" class="btn btn-accent btn-sm px-3">Get Started</a>
+  </div>
+</nav>
+
+<!-- ======================= HERO ======================= -->
+<header class="hero">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6">
+        <p class="eyebrow mb-3">Role-scoped firm operations</p>
+        <h1 class="mb-3">Every seat sees<br>exactly what it should.</h1>
+        <p class="hero-sub mb-4">
+          Ledger/Command is the operations desk for accounting and bookkeeping
+          firms running Super Admins, Admins, Account Officers, and Clients
+          on one system — without any of them ever seeing a row of data
+          that isn't theirs. No firm yet? An Account Officer can start solo —
+          no Admin required — and bring their own clients straight in.
+        </p>
+        <div class="d-flex flex-wrap gap-3 mb-3">
+          <a href="/register" class="btn btn-accent btn-lg px-4">Create your firm's ledger</a>
+          <a href="/login" class="btn btn-outline-light btn-lg px-4">Sign in</a>
+        </div>
+        <p class="plan-note mb-0">
+          <i class="bi bi-shield-check text-accent me-1"></i>Scoped at three layers: the UI, the API, and every automated action.
+          &nbsp;·&nbsp;<a href="/register?tab=officer" class="text-accent">I'm an Account Officer, no firm</a>
+          &nbsp;·&nbsp;<a href="/register?tab=client" class="text-accent">I'm a Client</a>
+        </p>
+      </div>
+
+      <div class="col-lg-6 hero-visual">
+        <div class="nav-preview-grid">
+          <div class="nav-preview np-super_admin">
+            <div class="np-role role-pill role-super_admin d-inline-block">Super Admin</div>
+            <ul class="mt-3">
+              <li>Dashboard</li>
+              <li>User Management</li>
+              <li>Master Audit Logs</li>
+              <li>Global Settings</li>
+            </ul>
+          </div>
+          <div class="nav-preview np-admin">
+            <div class="np-role role-pill role-admin d-inline-block">Admin</div>
+            <ul class="mt-3">
+              <li>Dashboard</li>
+              <li>User Management</li>
+              <li>Master Audit Logs</li>
+              <li class="dim">Delete Admins</li>
+            </ul>
+          </div>
+          <div class="nav-preview np-employee">
+            <div class="np-role role-pill role-employee d-inline-block">Employee</div>
+            <ul class="mt-3">
+              <li>Assigned Clients</li>
+              <li>Smart Inbox</li>
+              <li>Data Cleaner</li>
+              <li class="dim">Global Settings</li>
+            </ul>
+          </div>
+          <div class="nav-preview np-client">
+            <div class="np-role role-pill role-client d-inline-block">Client</div>
+            <ul class="mt-3">
+              <li>Upload Center</li>
+              <li>Document Checklist</li>
+              <li>Invoices</li>
+              <li class="dim">Smart Inbox</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ======================= ACCOUNT OFFICERS + CLIENTS ======================= -->
+<section class="section">
+  <div class="container">
+    <p class="section-eyebrow mb-2">No firm required</p>
+    <h2 class="section-title mb-2">Built for the day-to-day work of an Account Officer.</h2>
+    <p class="hero-sub mb-5">
+      A firm's Admin can invite you in — or you can start today on your own. Either way, your
+      book of clients is scoped to you the same way, and your clients get the same portal.
+    </p>
+
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="layer-card h-100">
+          <p class="layer-num mb-2"><i class="bi bi-person-badge"></i>&nbsp; FOR ACCOUNT OFFICERS</p>
+          <h5 class="mb-3">Run your own book, from day one</h5>
+          <ul class="mb-0" style="list-style:none; padding:0; color:var(--muted); font-size:.92rem;">
+            <li class="mb-2 pb-2" style="border-bottom:1px dashed var(--line);"><i class="bi bi-check2 text-accent me-2"></i>Sign up solo — no firm, no Admin, no waiting on an invite</li>
+            <li class="mb-2 pb-2" style="border-bottom:1px dashed var(--line);"><i class="bi bi-check2 text-accent me-2"></i>Add your own clients directly; each one is auto-assigned to you</li>
+            <li class="mb-2 pb-2" style="border-bottom:1px dashed var(--line);"><i class="bi bi-check2 text-accent me-2"></i>Smart Inbox &amp; Data Cleaner, pre-filtered to your roster only</li>
+            <li class="mb-2 pb-2" style="border-bottom:1px dashed var(--line);"><i class="bi bi-check2 text-accent me-2"></i>Collections &amp; chaser campaigns for overdue invoices — one click</li>
+            <li class="mb-2 pb-2" style="border-bottom:1px dashed var(--line);"><i class="bi bi-check2 text-accent me-2"></i>Message clients directly and keep the whole thread on file</li>
+            <li><i class="bi bi-check2 text-accent me-2"></i>Track document checklists and invoice status without a spreadsheet</li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="layer-card h-100">
+          <p class="layer-num mb-2"><i class="bi bi-person-check"></i>&nbsp; FOR THEIR CLIENTS</p>
+          <h5 class="mb-3">One portal, everything in one place</h5>
+          <ul class="mb-0" style="list-style:none; padding:0; color:var(--muted); font-size:.92rem;">
+            <li class="mb-2 pb-2" style="border-bottom:1px dashed var(--line);"><i class="bi bi-check2 text-accent me-2"></i>Sign up in minutes — pick your officer, or get matched later</li>
+            <li class="mb-2 pb-2" style="border-bottom:1px dashed var(--line);"><i class="bi bi-check2 text-accent me-2"></i>Upload statements and receipts without email attachments</li>
+            <li class="mb-2 pb-2" style="border-bottom:1px dashed var(--line);"><i class="bi bi-check2 text-accent me-2"></i>See a live document checklist — know exactly what's still owed</li>
+            <li class="mb-2 pb-2" style="border-bottom:1px dashed var(--line);"><i class="bi bi-check2 text-accent me-2"></i>Check invoice status and pay outstanding balances directly</li>
+            <li class="mb-2 pb-2" style="border-bottom:1px dashed var(--line);"><i class="bi bi-check2 text-accent me-2"></i>Message your account officer and keep a real communications history</li>
+            <li><i class="bi bi-check2 text-accent me-2"></i>Only ever see your own records — nothing from the officer's other clients</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= CLEARANCE CARDS ======================= -->
+<section class="section">
+  <div class="container">
+    <p class="section-eyebrow mb-2">Access control</p>
+    <h2 class="section-title mb-2">Four clearances, one ledger.</h2>
+    <p class="hero-sub mb-5">Rank determines reach. Nobody is trusted with more than their level requires — hover a clearance to see it stamped.</p>
+
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-3">
+        <div class="clearance-card" tabindex="0">
+          <span class="stamp">Authorized</span>
+          <p class="clearance-rank">RANK <span>03</span> · SUPER ADMIN</p>
+          <h5>Full system control</h5>
+          <ul>
+            <li>Global settings &amp; firm-wide billing</li>
+            <li>Create or delete Admins</li>
+            <li>Create or delete Employees &amp; Clients</li>
+            <li>Firm-wide analytics</li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="clearance-card" tabindex="0">
+          <span class="stamp">Authorized</span>
+          <p class="clearance-rank">RANK <span>02</span> · ADMIN</p>
+          <h5>Agency management</h5>
+          <ul>
+            <li>Create &amp; manage Employees, Clients</li>
+            <li>Firm-wide dashboard &amp; logs</li>
+            <li>Composio scope configuration</li>
+            <li>Cannot touch Admin accounts</li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="clearance-card" tabindex="0">
+          <span class="stamp">Authorized</span>
+          <p class="clearance-rank">RANK <span>01</span> · EMPLOYEE</p>
+          <h5>Assigned clients only</h5>
+          <ul>
+            <li>Smart Inbox, scoped server-side</li>
+            <li>Data Cleaner, scoped server-side</li>
+            <li>Collections &amp; chaser campaigns</li>
+            <li>Zero visibility outside their roster</li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="clearance-card" tabindex="0">
+          <span class="stamp">Authorized</span>
+          <p class="clearance-rank">RANK <span>00</span> · CLIENT</p>
+          <h5>Their portal, nothing else</h5>
+          <ul>
+            <li>Upload Center &amp; checklist</li>
+            <li>Invoices &amp; payment status</li>
+            <li>Message their account officer</li>
+            <li>No internal views, ever</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= THREE-LAYER ENFORCEMENT ======================= -->
+<section class="section">
+  <div class="container">
+    <p class="section-eyebrow mb-2">Enforcement</p>
+    <h2 class="section-title mb-5">Checked three times before anything happens.</h2>
+
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div class="layer-card">
+          <p class="layer-num mb-2">01 — FRONTEND</p>
+          <h5>View masking</h5>
+          <p>The offcanvas nav and every screen render only from that user's role. There's nothing to hide because there's nothing sent to hide.</p>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="layer-card">
+          <p class="layer-num mb-2">02 — BACKEND</p>
+          <h5>Scoped queries, JWT-enforced</h5>
+          <p>FastAPI resolves the caller's role from a signed session token and filters SQLite queries at the row level — an Employee's inbox query never leaves their assigned client IDs.</p>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="layer-card">
+          <p class="layer-num mb-2">03 — AUTOMATION</p>
+          <h5>Actor-role whitelist</h5>
+          <p>The Node.js dispatcher re-checks the actor's rank before any Composio action fires. High-level configuration actions reject below Admin rank, no exceptions.</p>
+        </div>
+      </div>
+    </div>
+
+    <p class="section-eyebrow mt-5 mb-3">Compliance</p>
+    <div class="compliance-receipt">
+      <div class="cr-header d-flex justify-content-between align-items-center">
+        <span class="cr-title">Audit trail entry</span>
+        <span class="status-badge suspended">Denied</span>
+      </div>
+      <div class="cr-row">
+        <span class="cr-label">When</span>
+        <span class="cr-value">July 4, 2026 at 1:02 PM</span>
+      </div>
+      <div class="cr-row">
+        <span class="cr-label">Who</span>
+        <span class="cr-value">Employee #14</span>
+      </div>
+      <div class="cr-row">
+        <span class="cr-label">Action attempted</span>
+        <span class="cr-value">Update connector scope</span>
+      </div>
+      <div class="cr-row">
+        <span class="cr-label">Reason for denial</span>
+        <span class="cr-value">High-level configuration actions require Admin rank or above — this actor's role didn't qualify.</span>
+      </div>
+    </div>
+    <p class="hero-sub mt-3 mb-0">Every attempt — allowed, denied, or failed — is written permanently. Admins and Super Admins can review the full trail from Master Audit Logs.</p>
+  </div>
+</section>
+
+<!-- ======================= CTA BAND ======================= -->
+<section class="cta-band">
+  <div class="container">
+    <h2 class="section-title mb-3">Three ways onto the ledger. Pick yours.</h2>
+    <p class="hero-sub mx-auto mb-4" style="max-width: 50ch;">Running a firm, working solo, or looking for your account officer's portal — there's a signup path built for each.</p>
+    <div class="d-flex flex-wrap justify-content-center gap-3">
+      <a href="/register" class="btn btn-accent btn-lg px-4">Create your firm's ledger</a>
+      <a href="/register?tab=officer" class="btn btn-outline-light btn-lg px-4">Start solo as an Account Officer</a>
+      <a href="/register?tab=client" class="btn btn-outline-light btn-lg px-4">I'm a Client</a>
+    </div>
+    <p class="plan-note mt-3 mb-0">Already on Ledger/Command? <a href="/login" class="text-accent">Sign in here</a>.</p>
+  </div>
+</section>
+
+<!-- ======================= FOOTER ======================= -->
+<footer class="marketing-footer">
+  <div class="container d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
+    <div class="ledger-mark">
+      <span class="ledger-tick"></span>
+      <span class="ledger-wordmark small-mark">LEDGER<span class="text-accent">/</span>COMMAND</span>
+    </div>
+    <div class="d-flex gap-4">
+      <a href="/login">Sign In</a>
+      <a href="/register">Register</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
