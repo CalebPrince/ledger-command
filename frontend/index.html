@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Ledger&nbsp;Command &mdash; AI-Assisted, RBAC-Secured Accounting Command Center</title>
-<meta name="description" content="One firm ledger, four clearances, and AI suggestions that always wait for a human. Super Admin, Admin, Employee, and Client each see exactly their own scope — enforced in the UI, the API, and every automation call.">
+<title>Ledger&nbsp;Command &mdash; The Account Officer's Command Center</title>
+<meta name="description" content="Run your book of clients from one desk: Smart Inbox, Data Cleaner, collections, real Gmail sends, and AI suggestions you approve. Your clients get their own portal for uploads, checklists, invoices, and messages — and only ever see their own records.">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
@@ -30,53 +30,39 @@
   <div class="container">
     <div class="row align-items-center g-5">
       <div class="col-lg-6">
-        <p class="eyebrow mb-3">Role-scoped firm operations</p>
-        <h1 class="mb-3">Every seat sees<br>exactly what it should.</h1>
+        <p class="eyebrow mb-3">For account officers &amp; their clients</p>
+        <h1 class="mb-3">Your whole book of clients,<br>on one desk.</h1>
         <p class="hero-sub mb-4">
-          Ledger/Command is the operations desk for accounting and bookkeeping
-          firms running Super Admins, Admins, Account Officers, and Clients
-          on one system — without any of them ever seeing a row of data
-          that isn't theirs. No firm yet? An Account Officer can start solo —
-          no Admin required — and bring their own clients straight in.
+          Ledger/Command is where an Account Officer actually works: a Smart Inbox
+          and Data Cleaner scoped to your roster, one-click collections on overdue
+          invoices, real email from your own Gmail, and AI suggestions that wait
+          for your approval. Your clients get their own portal — uploads, a live
+          document checklist, invoices, and a message thread straight to you.
+          Start solo today, or join your firm when they invite you.
         </p>
         <div class="d-flex flex-wrap gap-3 mb-3">
-          <a href="/register" class="btn btn-accent btn-lg px-4">Create your firm's ledger</a>
+          <a href="/register?tab=officer" class="btn btn-accent btn-lg px-4">Start managing clients</a>
           <a href="/login" class="btn btn-outline-light btn-lg px-4">Sign in</a>
         </div>
         <p class="plan-note mb-0">
-          <i class="bi bi-shield-check text-accent me-1"></i>Scoped at three layers: the UI, the API, and every automated action.
-          &nbsp;·&nbsp;<a href="/register?tab=officer" class="text-accent">I'm an Account Officer, no firm</a>
+          <i class="bi bi-shield-check text-accent me-1"></i>Your clients only ever see their own records — enforced in the UI, the API, and every automated action.
           &nbsp;·&nbsp;<a href="/register?tab=client" class="text-accent">I'm a Client</a>
+          &nbsp;·&nbsp;<a href="/register" class="text-accent">I run a firm</a>
         </p>
       </div>
 
       <div class="col-lg-6 hero-visual">
         <div class="nav-preview-grid">
-          <div class="nav-preview np-super_admin">
-            <div class="np-role role-pill role-super_admin d-inline-block">Super Admin</div>
-            <ul class="mt-3">
-              <li>Dashboard</li>
-              <li>User Management</li>
-              <li>Master Audit Logs</li>
-              <li>Global Settings</li>
-            </ul>
-          </div>
-          <div class="nav-preview np-admin">
-            <div class="np-role role-pill role-admin d-inline-block">Admin</div>
-            <ul class="mt-3">
-              <li>Dashboard</li>
-              <li>User Management</li>
-              <li>Master Audit Logs</li>
-              <li class="dim">Delete Admins</li>
-            </ul>
-          </div>
           <div class="nav-preview np-employee">
-            <div class="np-role role-pill role-employee d-inline-block">Employee</div>
+            <div class="np-role role-pill role-employee d-inline-block">Account Officer</div>
             <ul class="mt-3">
               <li>Assigned Clients</li>
               <li>Smart Inbox</li>
               <li>Data Cleaner</li>
-              <li class="dim">Global Settings</li>
+              <li>Collections &amp; Chasers</li>
+              <li>AI Suggestions Queue</li>
+              <li>Send via Gmail</li>
+              <li class="dim">Other officers' clients</li>
             </ul>
           </div>
           <div class="nav-preview np-client">
@@ -84,8 +70,10 @@
             <ul class="mt-3">
               <li>Upload Center</li>
               <li>Document Checklist</li>
-              <li>Invoices</li>
-              <li class="dim">Smart Inbox</li>
+              <li>Invoices &amp; Payments</li>
+              <li>Message My Officer</li>
+              <li>AI Account Summary</li>
+              <li class="dim">Anyone else's records</li>
             </ul>
           </div>
         </div>
@@ -115,6 +103,7 @@
             <li class="mb-2 pb-2" style="border-bottom:1px dashed var(--line);"><i class="bi bi-check2 text-accent me-2"></i>Smart Inbox &amp; Data Cleaner, pre-filtered to your roster only</li>
             <li class="mb-2 pb-2" style="border-bottom:1px dashed var(--line);"><i class="bi bi-check2 text-accent me-2"></i>Collections &amp; chaser campaigns for overdue invoices — one click</li>
             <li class="mb-2 pb-2" style="border-bottom:1px dashed var(--line);"><i class="bi bi-check2 text-accent me-2"></i>Message clients directly and keep the whole thread on file</li>
+            <li class="mb-2 pb-2" style="border-bottom:1px dashed var(--line);"><i class="bi bi-check2 text-accent me-2"></i>Connect your own Gmail and send real email from a client's record — it lands in their inbox and on their thread</li>
             <li class="mb-2 pb-2" style="border-bottom:1px dashed var(--line);"><i class="bi bi-check2 text-accent me-2"></i>Run an AI scan for reconciliation flags, reminders &amp; invoice drafts — you approve, nothing fires without you</li>
             <li><i class="bi bi-check2 text-accent me-2"></i>Generate a real AI-written client summary in one click</li>
           </ul>
@@ -196,46 +185,20 @@
 <section class="section">
   <div class="container">
     <p class="section-eyebrow mb-2">Access control</p>
-    <h2 class="section-title mb-2">Four clearances, one ledger.</h2>
-    <p class="hero-sub mb-5">Rank determines reach. Nobody is trusted with more than their level requires — hover a clearance to see it stamped.</p>
+    <h2 class="section-title mb-2">Your work is yours. Their records are theirs.</h2>
+    <p class="hero-sub mb-5">Officers and clients do the day-to-day work; firm roles exist to support them, not to look over their shoulder at every screen. Hover a clearance to see it stamped.</p>
 
     <div class="row g-4">
       <div class="col-md-6 col-lg-3">
         <div class="clearance-card" tabindex="0">
           <span class="stamp">Authorized</span>
-          <p class="clearance-rank">RANK <span>03</span> · SUPER ADMIN</p>
-          <h5>Full system control</h5>
+          <p class="clearance-rank">RANK <span>01</span> · ACCOUNT OFFICER</p>
+          <h5>Runs the book</h5>
           <ul>
-            <li>Global settings &amp; firm-wide billing</li>
-            <li>Create or delete Admins</li>
-            <li>Create or delete Employees &amp; Clients</li>
-            <li>Firm-wide analytics</li>
-          </ul>
-        </div>
-      </div>
-      <div class="col-md-6 col-lg-3">
-        <div class="clearance-card" tabindex="0">
-          <span class="stamp">Authorized</span>
-          <p class="clearance-rank">RANK <span>02</span> · ADMIN</p>
-          <h5>Agency management</h5>
-          <ul>
-            <li>Create &amp; manage Employees, Clients</li>
-            <li>Firm-wide dashboard &amp; logs</li>
-            <li>Composio scope configuration</li>
-            <li>Cannot touch Admin accounts</li>
-          </ul>
-        </div>
-      </div>
-      <div class="col-md-6 col-lg-3">
-        <div class="clearance-card" tabindex="0">
-          <span class="stamp">Authorized</span>
-          <p class="clearance-rank">RANK <span>01</span> · EMPLOYEE</p>
-          <h5>Assigned clients only</h5>
-          <ul>
-            <li>Smart Inbox &amp; Data Cleaner, scoped server-side</li>
-            <li>Collections &amp; chaser campaigns</li>
-            <li>AI suggestions — human-approved only</li>
-            <li>Zero visibility outside their roster</li>
+            <li>Smart Inbox &amp; Data Cleaner, scoped to their roster</li>
+            <li>Collections, chasers &amp; real Gmail sends</li>
+            <li>AI scans — every suggestion waits for their approval</li>
+            <li>Nothing from other officers' rosters, ever</li>
           </ul>
         </div>
       </div>
@@ -243,12 +206,36 @@
         <div class="clearance-card" tabindex="0">
           <span class="stamp">Authorized</span>
           <p class="clearance-rank">RANK <span>00</span> · CLIENT</p>
-          <h5>Their portal, nothing else</h5>
+          <h5>Their portal, in full</h5>
           <ul>
-            <li>Upload Center &amp; checklist</li>
-            <li>Invoices &amp; payment status</li>
-            <li>Message their account officer</li>
-            <li>No internal views, ever</li>
+            <li>Upload Center &amp; live document checklist</li>
+            <li>Invoices, payment status &amp; balances</li>
+            <li>Direct message thread with their officer</li>
+            <li>Only their own records — nobody else's</li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="clearance-card" tabindex="0">
+          <span class="stamp">Authorized</span>
+          <p class="clearance-rank">RANK <span>02</span> · ADMIN</p>
+          <h5>Keeps officers staffed</h5>
+          <ul>
+            <li>Invites officers &amp; assigns clients</li>
+            <li>Firm-wide dashboard &amp; logs</li>
+            <li>Never edits an officer's client work</li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="clearance-card" tabindex="0">
+          <span class="stamp">Authorized</span>
+          <p class="clearance-rank">RANK <span>03</span> · SUPER ADMIN</p>
+          <h5>Keeps the lights on</h5>
+          <ul>
+            <li>Global settings &amp; integrations</li>
+            <li>Firm-wide analytics &amp; audit trail</li>
+            <li>Infrastructure, not day-to-day books</li>
           </ul>
         </div>
       </div>
@@ -260,7 +247,8 @@
 <section class="section">
   <div class="container">
     <p class="section-eyebrow mb-2">Enforcement</p>
-    <h2 class="section-title mb-5">Checked three times before anything happens.</h2>
+    <h2 class="section-title mb-2">Checked three times before anything happens.</h2>
+    <p class="hero-sub mb-5">This is what makes the promise real for officers and clients alike: your roster stays yours, their records stay theirs — even a buggy script or a mistyped request can't cross the line.</p>
 
     <div class="row g-4">
       <div class="col-lg-4">
@@ -309,7 +297,7 @@
         <span class="cr-value">High-level configuration actions require Admin rank or above — this actor's role didn't qualify.</span>
       </div>
     </div>
-    <p class="hero-sub mt-3 mb-0">Every attempt — allowed, denied, or failed — is written permanently. Admins and Super Admins can review the full trail from Master Audit Logs.</p>
+    <p class="hero-sub mt-3 mb-0">Every attempt — allowed, denied, or failed — is written permanently, so officers and clients never have to wonder what touched their data.</p>
   </div>
 </section>
 
@@ -317,11 +305,11 @@
 <section class="cta-band">
   <div class="container">
     <h2 class="section-title mb-3">Three ways onto the ledger. Pick yours.</h2>
-    <p class="hero-sub mx-auto mb-4" style="max-width: 50ch;">Running a firm, working solo, or looking for your account officer's portal — there's a signup path built for each.</p>
+    <p class="hero-sub mx-auto mb-4" style="max-width: 50ch;">Managing clients solo, looking for your account officer's portal, or running a whole firm — there's a signup path built for each.</p>
     <div class="d-flex flex-wrap justify-content-center gap-3">
-      <a href="/register" class="btn btn-accent btn-lg px-4">Create your firm's ledger</a>
-      <a href="/register?tab=officer" class="btn btn-outline-light btn-lg px-4">Start solo as an Account Officer</a>
+      <a href="/register?tab=officer" class="btn btn-accent btn-lg px-4">Start as an Account Officer</a>
       <a href="/register?tab=client" class="btn btn-outline-light btn-lg px-4">I'm a Client</a>
+      <a href="/register" class="btn btn-outline-light btn-lg px-4">Create your firm's ledger</a>
     </div>
     <p class="plan-note mt-3 mb-0">Already on Ledger/Command? <a href="/login" class="text-accent">Sign in here</a>.</p>
   </div>
