@@ -814,19 +814,29 @@ def _assert_client_access(conn, current_user: dict, client_id: int) -> None:
 
 
 async def _dispatch_composio_action(
-    actor_id: int, actor_role: str, action_name: str, entity_id: str, params: Optional[dict] = None
+    actor_id: int, actor_role: str, action_name: str, entity_id: str,
+    params: Optional[dict] = None, composio_api_key: Optional[str] = None,
 ) -> dict:
     """
     Server-side call-through to the Node automation layer. actor_id/actor_role
     are stamped from the already-verified JWT (current_user), never trusted
     from the browser, and automation.js independently re-validates them again
     before touching Composio -- defense in depth across both layers.
+
+    composio_api_key comes from the Super-Admin-configured app_settings row
+    (same runtime-settable pattern as the Gemini key) and is forwarded as a
+    header so automation.js can use it for this call; if omitted, automation.js
+    falls back to its own COMPOSIO_API_KEY environment variable.
     """
+    headers = {"X-Actor-Id": str(actor_id), "X-Actor-Role": actor_role}
+    if composio_api_key:
+        headers["X-Composio-Api-Key"] = composio_api_key
+
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
             resp = await client.post(
                 f"{AUTOMATION_BASE_URL}/api/v1/execute-action",
-                headers={"X-Actor-Id": str(actor_id), "X-Actor-Role": actor_role},
+                headers=headers,
                 json={"action_name": action_name, "entity_id": entity_id, "params": params or {}},
             )
         return {"ok": resp.status_code < 400, "status_code": resp.status_code, "body": resp.json()}
@@ -1359,12 +1369,14 @@ async def toggle_composio_scope(
         if not scope:
             raise HTTPException(status_code=404, detail="Unknown scope")
 
+        composio_api_key = _get_app_setting(conn, "composio_api_key")
         dispatch = await _dispatch_composio_action(
             actor_id=current_user["id"],
             actor_role=current_user["role"],
             action_name=f"update_scope_{scope_key}",
             entity_id=current_user.get("company_name") or f"user-{current_user['id']}",
             params={"enabled": payload.enabled},
+            composio_api_key=composio_api_key,
         )
 
         conn.execute(
@@ -1444,6 +1456,7 @@ async def approve_ai_suggestion(
             raise HTTPException(status_code=400, detail="Suggestion has already been reviewed")
 
         payload = json.loads(suggestion["payload"])
+        composio_api_key = _get_app_setting(conn, "composio_api_key")
 
         # Re-validated through the same actor-role-gated dispatcher used for
         # Composio actions (Part 3) -- approving an AI suggestion is itself a
@@ -1454,6 +1467,7 @@ async def approve_ai_suggestion(
             action_name=f"ai_approve_{suggestion['suggestion_type']}",
             entity_id=f"client-{suggestion['client_id']}",
             params=payload,
+            composio_api_key=composio_api_key,
         )
 
         if suggestion["suggestion_type"] == "reconciliation_flag":
@@ -1588,6 +1602,43 @@ def set_gemini_settings(
 
     log_audit(current_user["id"], current_user["role"], "update_gemini_settings", "Updated Gemini API key/model")
     return {"message": "Gemini settings updated"}
+
+
+# --------------------------------------------------------------------------
+# Super Admin: Composio API key configuration (runtime setting, not env var).
+# The key lives here, in the Python backend's DB -- automation.js is a
+# separate Node process with no shared database, so the key is forwarded
+# per-request via _dispatch_composio_action rather than read directly by
+# automation.js from this table.
+# --------------------------------------------------------------------------
+
+class ComposioSettingsRequest(BaseModel):
+    api_key: str = Field(min_length=1)
+
+
+@router.get("/api/admin/settings/composio")
+def get_composio_settings(current_user: dict = Depends(require_role(["super_admin"]))):
+    with get_db() as conn:
+        key_row = conn.execute("SELECT value, updated_at FROM app_settings WHERE key = 'composio_api_key'").fetchone()
+
+    configured = bool(key_row and key_row["value"])
+    return {
+        "configured": configured,
+        "masked_key": f"••••••••{key_row['value'][-4:]}" if configured else None,
+        "updated_at": key_row["updated_at"] if key_row else None,
+    }
+
+
+@router.post("/api/admin/settings/composio")
+def set_composio_settings(
+    payload: ComposioSettingsRequest,
+    current_user: dict = Depends(require_role(["super_admin"])),
+):
+    with get_db() as conn:
+        _set_app_setting(conn, "composio_api_key", payload.api_key, current_user["id"])
+
+    log_audit(current_user["id"], current_user["role"], "update_composio_settings", "Updated Composio API key")
+    return {"message": "Composio settings updated"}
 
 
 # --------------------------------------------------------------------------

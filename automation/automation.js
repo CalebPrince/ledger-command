@@ -102,6 +102,12 @@ app.post("/api/v1/execute-action", requireActorIdentity, async (req, res) => {
   const { action_name, entity_id, params } = req.body;
   const { id: actorId, role: actorRole } = req.actor;
 
+  // The Python backend is a Super-Admin-configurable, DB-backed source of
+  // truth for this key (see /api/admin/settings/composio) and forwards it
+  // per-request since this Node process has no shared database. Falls back
+  // to this process's own COMPOSIO_API_KEY env var for standalone/dev use.
+  const composioApiKey = req.header("X-Composio-Api-Key") || COMPOSIO_API_KEY;
+
   if (!action_name || !entity_id) {
     return res.status(400).json({ error: "action_name and entity_id are required" });
   }
@@ -135,7 +141,7 @@ app.post("/api/v1/execute-action", requireActorIdentity, async (req, res) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-API-Key": COMPOSIO_API_KEY,
+          "X-API-Key": composioApiKey,
         },
         body: JSON.stringify({
           entityId: entity_id,

@@ -152,6 +152,27 @@
           <p class="text-muted">Firm-wide configuration — Composio API scopes, billing plan, and system-level toggles.</p>
           <div class="row g-3" id="globalAnalyticsCards"></div>
         </div>
+        <div class="card panel-card p-4 mb-3 d-none" id="composioSettingsCard">
+          <h6 class="mb-1">Composio API Key</h6>
+          <p class="text-muted small mb-3">
+            Forwarded to the Node automation layer on each dispatch — that process has no
+            shared database, so this is the source of truth. Stored server-side, no restart
+            needed. Super Admin only.
+          </p>
+          <p class="mb-3" id="composioStatusLine"></p>
+          <form id="composioSettingsForm" class="row g-2">
+            <div class="col-12 col-md-10">
+              <label class="form-label small text-uppercase text-muted">Composio API Key</label>
+              <input type="password" class="form-control" id="composioApiKeyInput" placeholder="Enter to set or replace" autocomplete="off">
+            </div>
+            <div class="col-12 col-md-2 d-flex align-items-end">
+              <button type="submit" class="btn btn-accent w-100">Save</button>
+            </div>
+          </form>
+          <div id="composioSettingsError" class="alert alert-danger py-2 small mt-3 d-none"></div>
+          <div id="composioSettingsSuccess" class="alert alert-success py-2 small mt-3 d-none"></div>
+        </div>
+
         <div class="card panel-card p-4 mb-3">
           <h6 class="mb-1">Composio API Scopes</h6>
           <p class="text-muted small mb-3">

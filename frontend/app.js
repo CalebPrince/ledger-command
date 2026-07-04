@@ -451,13 +451,56 @@ async function loadGlobalSettings() {
   loadComposioScopes();
 
   const geminiCard = document.getElementById("geminiSettingsCard");
+  const composioSettingsCard = document.getElementById("composioSettingsCard");
   if (state.user.role === "super_admin") {
     geminiCard.classList.remove("d-none");
     loadGeminiSettings();
+    composioSettingsCard.classList.remove("d-none");
+    loadComposioSettings();
   } else {
     geminiCard.classList.add("d-none");
+    composioSettingsCard.classList.add("d-none");
   }
 }
+
+// ---- Composio API key settings (Super Admin only) --------------------------
+async function loadComposioSettings() {
+  const statusLine = document.getElementById("composioStatusLine");
+  try {
+    const data = await api("/api/admin/settings/composio");
+    statusLine.innerHTML = data.configured
+      ? `<span class="text-accent">Configured</span> — <code>${data.masked_key}</code>, last updated ${data.updated_at}`
+      : `<span class="text-muted">Not configured yet.</span> Composio dispatches will fall back to automation.js's own COMPOSIO_API_KEY environment variable, if any.`;
+  } catch (err) {
+    statusLine.innerHTML = `<span class="text-danger">${err.message}</span>`;
+  }
+}
+
+document.getElementById("composioSettingsForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const errorBox = document.getElementById("composioSettingsError");
+  const successBox = document.getElementById("composioSettingsSuccess");
+  errorBox.classList.add("d-none");
+  successBox.classList.add("d-none");
+
+  const apiKey = document.getElementById("composioApiKeyInput").value.trim();
+  if (!apiKey) {
+    errorBox.textContent = "Enter an API key to save.";
+    errorBox.classList.remove("d-none");
+    return;
+  }
+
+  try {
+    await api("/api/admin/settings/composio", { method: "POST", body: JSON.stringify({ api_key: apiKey }) });
+    document.getElementById("composioSettingsForm").reset();
+    successBox.textContent = "Composio settings updated.";
+    successBox.classList.remove("d-none");
+    loadComposioSettings();
+  } catch (err) {
+    errorBox.textContent = err.message;
+    errorBox.classList.remove("d-none");
+  }
+});
 
 // ---- Gemini API settings (Super Admin only) --------------------------------
 async function loadGeminiSettings() {
