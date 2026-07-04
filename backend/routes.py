@@ -1715,7 +1715,11 @@ async def connect_gmail(
     if not auth_config_id:
         raise HTTPException(status_code=503, detail="Gmail Auth Config ID is not configured. A Super Admin can set it in Global Settings.")
 
-    callback_url = str(request.base_url).rstrip("/") + "/integrations/callback"
+    # Behind a reverse proxy request.base_url is the internal address unless
+    # the proxy forwards X-Forwarded-Proto/Host, so production sets
+    # PUBLIC_BASE_URL (e.g. https://ledger-command.duckdns.org) explicitly.
+    public_base = os.environ.get("PUBLIC_BASE_URL") or str(request.base_url)
+    callback_url = public_base.rstrip("/") + "/integrations/callback"
 
     try:
         async with httpx.AsyncClient(timeout=15.0) as client:

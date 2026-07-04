@@ -11,6 +11,7 @@ Bootstrap/Vanilla-JS frontend from ../frontend, and mounts all
 RBAC-protected API routes from routes.py.
 """
 
+import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -39,10 +40,13 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS: tighten allow_origins to your real domain(s) in production.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://ledger-command.duckdns.org",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -81,4 +85,14 @@ if FRONTEND_DIR.exists():
 
 
 if __name__ == "__main__":
-    uvicorn.run("server:app", host="0.0.0.0", port=8000, reload=True)
+    # PORT is set in production (systemd runs this on 8001 behind Apache);
+    # proxy_headers makes uvicorn honor X-Forwarded-Proto/Host from the
+    # reverse proxy so request.base_url reflects the public https origin.
+    uvicorn.run(
+        "server:app",
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", "8000")),
+        reload=os.environ.get("ENV", "dev") != "production",
+        proxy_headers=True,
+        forwarded_allow_ips="127.0.0.1",
+    )
