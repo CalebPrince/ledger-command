@@ -165,6 +165,21 @@ def init_db(seed: bool = True) -> None:
                 updated_at  TEXT NOT NULL DEFAULT (datetime('now'))
             );
 
+            -- Real Composio-connected accounts (Tier 1) -- one row per
+            -- (user, toolkit), e.g. an Employee's own connected Gmail account
+            -- used to send real email through GMAIL_SEND_EMAIL.
+            CREATE TABLE IF NOT EXISTS composio_connections (
+                id                      INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id                 INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                toolkit                 TEXT NOT NULL,
+                connected_account_id    TEXT,
+                status                  TEXT NOT NULL DEFAULT 'pending' CHECK (status IN
+                                            ('pending', 'active', 'failed')),
+                created_at              TEXT NOT NULL DEFAULT (datetime('now')),
+                updated_at              TEXT NOT NULL DEFAULT (datetime('now')),
+                UNIQUE(user_id, toolkit)
+            );
+
             -- Simulated AI-agent suggestions: a canned template bank stands in
             -- for real model output, but the review workflow (pending queue,
             -- explicit human Approve/Reject, real side-effects on approval) is

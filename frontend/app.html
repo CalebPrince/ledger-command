@@ -205,6 +205,28 @@
           <div id="geminiSettingsError" class="alert alert-danger py-2 small mt-3 d-none"></div>
           <div id="geminiSettingsSuccess" class="alert alert-success py-2 small mt-3 d-none"></div>
         </div>
+
+        <div class="card panel-card p-4 mt-3 d-none" id="gmailAuthConfigCard">
+          <h6 class="mb-1">Gmail Auth Config (Composio)</h6>
+          <p class="text-muted small mb-3">
+            Composio only supports creating this in their dashboard — go to
+            <a href="https://dashboard.composio.dev/~/project/auth-configs" target="_blank" rel="noopener" class="text-accent">dashboard.composio.dev → Auth Configs</a>,
+            create a Gmail auth config (Composio-managed OAuth is fine for testing), then paste the resulting ID here.
+            Super Admin only.
+          </p>
+          <p class="mb-3" id="gmailAuthConfigStatusLine"></p>
+          <form id="gmailAuthConfigForm" class="row g-2">
+            <div class="col-12 col-md-10">
+              <label class="form-label small text-uppercase text-muted">Gmail auth_config_id</label>
+              <input type="text" class="form-control" id="gmailAuthConfigInput" placeholder="ac_xxxxxxxxxxxx" autocomplete="off">
+            </div>
+            <div class="col-12 col-md-2 d-flex align-items-end">
+              <button type="submit" class="btn btn-accent w-100">Save</button>
+            </div>
+          </form>
+          <div id="gmailAuthConfigError" class="alert alert-danger py-2 small mt-3 d-none"></div>
+          <div id="gmailAuthConfigSuccess" class="alert alert-success py-2 small mt-3 d-none"></div>
+        </div>
       </section>
 
       <!-- ---------- VIEW: Overview (Employee) ---------- -->
@@ -297,7 +319,7 @@
           <p class="text-muted mb-1">Signed in as</p>
           <p class="mb-0"><strong id="personalSettingsName"></strong> — <span id="personalSettingsEmail"></span></p>
         </div>
-        <div class="card panel-card p-4">
+        <div class="card panel-card p-4 mb-3">
           <h6 class="mb-3">Change Password</h6>
           <form id="changePasswordForm">
             <div id="changePasswordError" class="alert alert-danger py-2 small d-none"></div>
@@ -312,6 +334,15 @@
             </div>
             <button type="submit" class="btn btn-accent">Update Password</button>
           </form>
+        </div>
+        <div class="card panel-card p-4">
+          <h6 class="mb-1">Connect Gmail</h6>
+          <p class="text-muted small mb-3">
+            Connects your real Gmail account so you can send genuine emails to clients
+            straight from Ledger/Command, through Composio.
+          </p>
+          <p class="mb-3" id="gmailConnectStatusLine">Loading…</p>
+          <button type="button" class="btn btn-accent" id="connectGmailBtn">Connect Gmail</button>
         </div>
       </section>
 
@@ -642,10 +673,22 @@
 
         <div class="manage-tab-pane d-none" id="manageTab-messages">
           <div id="manageMessageThread" class="message-thread mb-3"></div>
-          <form id="manageMessageForm" class="d-flex gap-2">
+          <form id="manageMessageForm" class="d-flex gap-2 mb-3">
             <input type="text" class="form-control" id="manageMessageInput" placeholder="Type a message…" required>
             <button type="submit" class="btn btn-accent"><i class="bi bi-send"></i></button>
           </form>
+          <div class="border-top pt-3" style="border-color: var(--line) !important;">
+            <p class="text-muted small mb-2" id="gmailSendStatusLine">Checking Gmail connection…</p>
+            <form id="gmailSendForm" class="d-none">
+              <div class="mb-2">
+                <input type="text" class="form-control form-control-sm" id="gmailSendSubject" placeholder="Subject" required>
+              </div>
+              <div class="mb-2">
+                <textarea class="form-control form-control-sm" id="gmailSendBody" rows="2" placeholder="Email body…" required></textarea>
+              </div>
+              <button type="submit" class="btn btn-sm btn-outline-light"><i class="bi bi-envelope me-1"></i>Send via Gmail</button>
+            </form>
+          </div>
         </div>
       </div>
     </div>

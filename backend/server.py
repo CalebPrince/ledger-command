@@ -69,6 +69,16 @@ if FRONTEND_DIR.exists():
         """Public self-service firm signup page."""
         return FileResponse(FRONTEND_DIR / "register.html")
 
+    @app.get("/integrations/callback")
+    def serve_integrations_callback():
+        """
+        Landing page Composio redirects the user's browser back to after they
+        complete a real OAuth consent flow (e.g. connecting Gmail). The app
+        itself polls GET /api/integrations/gmail/status separately, so this
+        page just needs to tell the user they're done and can close the tab.
+        """
+        return FileResponse(FRONTEND_DIR / "integrations-callback.html")
+
 
 if __name__ == "__main__":
     uvicorn.run("server:app", host="0.0.0.0", port=8000, reload=True)

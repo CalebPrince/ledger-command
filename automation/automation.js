@@ -26,7 +26,10 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 4000;
 const COMPOSIO_API_KEY = process.env.COMPOSIO_API_KEY || "";
-const COMPOSIO_BASE_URL = "https://backend.composio.dev/api/v1/actions";
+// Composio's v1 actions API was fully retired 2026-07-03; this is the
+// current tool-execution endpoint (POST .../{tool_slug} with a JSON body
+// of { connected_account_id, arguments }).
+const COMPOSIO_BASE_URL = "https://backend.composio.dev/api/v3/tools/execute";
 const AUDIT_LOG_PATH = path.join(__dirname, "compliance_audit_log.jsonl");
 
 // --------------------------------------------------------------------------
@@ -99,7 +102,7 @@ function requireActorIdentity(req, res, next) {
 // --------------------------------------------------------------------------
 
 app.post("/api/v1/execute-action", requireActorIdentity, async (req, res) => {
-  const { action_name, entity_id, params } = req.body;
+  const { action_name, entity_id, params, connected_account_id } = req.body;
   const { id: actorId, role: actorRole } = req.actor;
 
   // The Python backend is a Super-Admin-configurable, DB-backed source of
@@ -136,16 +139,16 @@ app.post("/api/v1/execute-action", requireActorIdentity, async (req, res) => {
 
   try {
     const composioResponse = await fetch(
-      `${COMPOSIO_BASE_URL}/${encodeURIComponent(action_name)}/execute`,
+      `${COMPOSIO_BASE_URL}/${encodeURIComponent(action_name)}`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-API-Key": composioApiKey,
+          "x-api-key": composioApiKey,
         },
         body: JSON.stringify({
-          entityId: entity_id,
-          input: params || {},
+          connected_account_id: connected_account_id || undefined,
+          arguments: params || {},
         }),
       }
     );

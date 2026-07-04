@@ -25,7 +25,7 @@ try:
 except ImportError:
     genai = None
 import httpx
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile, status
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, EmailStr, Field
 
@@ -54,6 +54,12 @@ UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 # talks to automation.js directly.
 # --------------------------------------------------------------------------
 AUTOMATION_BASE_URL = os.environ.get("AUTOMATION_BASE_URL", "http://localhost:4000")
+
+# Composio's *connection management* API (creating/checking connected
+# accounts) is called directly from the Python backend -- this is identity/
+# account linking, not action execution, so it doesn't go through
+# automation.js's actor-role-gated dispatcher the way GMAIL_SEND_EMAIL does.
+COMPOSIO_API_BASE = "https://backend.composio.dev/api/v3.1"
 
 # --------------------------------------------------------------------------
 # Gemini-powered client report narration -- the first "real AI" tier: no
@@ -816,6 +822,7 @@ def _assert_client_access(conn, current_user: dict, client_id: int) -> None:
 async def _dispatch_composio_action(
     actor_id: int, actor_role: str, action_name: str, entity_id: str,
     params: Optional[dict] = None, composio_api_key: Optional[str] = None,
+    connected_account_id: Optional[str] = None,
 ) -> dict:
     """
     Server-side call-through to the Node automation layer. actor_id/actor_role
@@ -827,17 +834,27 @@ async def _dispatch_composio_action(
     (same runtime-settable pattern as the Gemini key) and is forwarded as a
     header so automation.js can use it for this call; if omitted, automation.js
     falls back to its own COMPOSIO_API_KEY environment variable.
+
+    connected_account_id identifies which real, OAuth-connected account
+    (e.g. a specific Employee's Gmail) to act as for real tool calls like
+    GMAIL_SEND_EMAIL. It's None for the demo/whitelist-testing actions
+    (update_scope_*, ai_approve_*) that have no real connected account.
     """
     headers = {"X-Actor-Id": str(actor_id), "X-Actor-Role": actor_role}
     if composio_api_key:
         headers["X-Composio-Api-Key"] = composio_api_key
 
     try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
+        async with httpx.AsyncClient(timeout=15.0) as client:
             resp = await client.post(
                 f"{AUTOMATION_BASE_URL}/api/v1/execute-action",
                 headers=headers,
-                json={"action_name": action_name, "entity_id": entity_id, "params": params or {}},
+                json={
+                    "action_name": action_name,
+                    "entity_id": entity_id,
+                    "params": params or {},
+                    "connected_account_id": connected_account_id,
+                },
             )
         return {"ok": resp.status_code < 400, "status_code": resp.status_code, "body": resp.json()}
     except httpx.RequestError as exc:
@@ -1639,6 +1656,193 @@ def set_composio_settings(
 
     log_audit(current_user["id"], current_user["role"], "update_composio_settings", "Updated Composio API key")
     return {"message": "Composio settings updated"}
+
+
+# --------------------------------------------------------------------------
+# Super Admin: Gmail Auth Config ID (Tier 1). Composio only supports creating
+# this via their dashboard (dashboard.composio.dev -> Auth Configs) -- there
+# is no API for it, so a Super Admin creates it there once and pastes the
+# resulting auth_config_id here.
+# --------------------------------------------------------------------------
+
+class GmailAuthConfigRequest(BaseModel):
+    auth_config_id: str = Field(min_length=1)
+
+
+@router.get("/api/admin/settings/composio-gmail")
+def get_gmail_auth_config(current_user: dict = Depends(require_role(["super_admin"]))):
+    with get_db() as conn:
+        row = conn.execute(
+            "SELECT value, updated_at FROM app_settings WHERE key = 'composio_gmail_auth_config_id'"
+        ).fetchone()
+    configured = bool(row and row["value"])
+    return {
+        "configured": configured,
+        "auth_config_id": row["value"] if configured else None,
+        "updated_at": row["updated_at"] if row else None,
+    }
+
+
+@router.post("/api/admin/settings/composio-gmail")
+def set_gmail_auth_config(
+    payload: GmailAuthConfigRequest,
+    current_user: dict = Depends(require_role(["super_admin"])),
+):
+    with get_db() as conn:
+        _set_app_setting(conn, "composio_gmail_auth_config_id", payload.auth_config_id, current_user["id"])
+
+    log_audit(current_user["id"], current_user["role"], "update_gmail_auth_config", "Updated Gmail auth_config_id")
+    return {"message": "Gmail auth config saved"}
+
+
+# --------------------------------------------------------------------------
+# Gmail connection (Tier 1) -- each Employee/Admin/Super Admin connects their
+# own Gmail account through a real Google OAuth consent screen (via Composio),
+# then can send real email as themselves from the Manage Client modal.
+# --------------------------------------------------------------------------
+
+@router.post("/api/integrations/gmail/connect")
+async def connect_gmail(
+    request: Request,
+    current_user: dict = Depends(require_role(["employee", "admin", "super_admin"])),
+):
+    with get_db() as conn:
+        composio_api_key = _get_app_setting(conn, "composio_api_key")
+        auth_config_id = _get_app_setting(conn, "composio_gmail_auth_config_id")
+
+    if not composio_api_key:
+        raise HTTPException(status_code=503, detail="Composio API key is not configured. A Super Admin can set it in Global Settings.")
+    if not auth_config_id:
+        raise HTTPException(status_code=503, detail="Gmail Auth Config ID is not configured. A Super Admin can set it in Global Settings.")
+
+    callback_url = str(request.base_url).rstrip("/") + "/integrations/callback"
+
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            resp = await client.post(
+                f"{COMPOSIO_API_BASE}/connected_accounts/link",
+                headers={"x-api-key": composio_api_key, "Content-Type": "application/json"},
+                json={"user_id": str(current_user["id"]), "auth_config_id": auth_config_id, "callback_url": callback_url},
+            )
+        body = resp.json()
+    except httpx.RequestError as exc:
+        raise HTTPException(status_code=502, detail=f"Could not reach Composio: {exc}")
+
+    if resp.status_code >= 400:
+        raise HTTPException(status_code=502, detail=f"Composio connection request failed: {body}")
+
+    connected_account_id = body.get("id")
+    with get_db() as conn:
+        conn.execute(
+            """INSERT INTO composio_connections (user_id, toolkit, connected_account_id, status)
+               VALUES (?, 'GMAIL', ?, 'pending')
+               ON CONFLICT(user_id, toolkit) DO UPDATE SET
+                   connected_account_id = excluded.connected_account_id,
+                   status = 'pending',
+                   updated_at = datetime('now')""",
+            (current_user["id"], connected_account_id),
+        )
+
+    log_audit(current_user["id"], current_user["role"], "connect_gmail_initiated", f"connected_account_id={connected_account_id}")
+    return {"redirect_url": body.get("redirect_url"), "connected_account_id": connected_account_id}
+
+
+@router.get("/api/integrations/gmail/status")
+async def gmail_status(current_user: dict = Depends(require_role(["employee", "admin", "super_admin"]))):
+    with get_db() as conn:
+        conn_row = conn.execute(
+            "SELECT * FROM composio_connections WHERE user_id = ? AND toolkit = 'GMAIL'", (current_user["id"],)
+        ).fetchone()
+        if not conn_row:
+            return {"status": "not_connected"}
+
+        if conn_row["status"] == "pending" and conn_row["connected_account_id"]:
+            composio_api_key = _get_app_setting(conn, "composio_api_key")
+            if composio_api_key:
+                try:
+                    async with httpx.AsyncClient(timeout=10.0) as client:
+                        resp = await client.get(
+                            f"{COMPOSIO_API_BASE}/connected_accounts/{conn_row['connected_account_id']}",
+                            headers={"x-api-key": composio_api_key},
+                        )
+                    remote = resp.json()
+                    remote_status = (remote.get("status") or "").upper()
+                    new_status = (
+                        "active" if remote_status == "ACTIVE"
+                        else "failed" if remote_status in ("FAILED", "EXPIRED")
+                        else "pending"
+                    )
+                    if new_status != conn_row["status"]:
+                        conn.execute(
+                            "UPDATE composio_connections SET status = ?, updated_at = datetime('now') WHERE id = ?",
+                            (new_status, conn_row["id"]),
+                        )
+                    return {"status": new_status}
+                except httpx.RequestError:
+                    pass
+
+        return {"status": conn_row["status"]}
+
+
+class GmailSendRequest(BaseModel):
+    client_id: int
+    subject: str = Field(min_length=1)
+    body: str = Field(min_length=1)
+
+
+@router.post("/api/dashboard/integrations/gmail/send")
+async def send_gmail(
+    payload: GmailSendRequest,
+    current_user: dict = Depends(require_role(["employee", "admin", "super_admin"])),
+):
+    """
+    Sends a genuine email through the current user's own connected Gmail
+    account via Composio's GMAIL_SEND_EMAIL tool -- not a template, not a
+    logged-only message: a real Gmail API call. Routed through automation.js
+    the same as every other Composio dispatch, so it gets the same
+    actor-role whitelist pass and permanent audit trail (GMAIL_SEND_EMAIL
+    isn't a high-level action, so any Employee assigned to this client may
+    trigger it -- only structural/config actions require Admin rank).
+    """
+    with get_db() as conn:
+        _assert_client_access(conn, current_user, payload.client_id)
+        client = conn.execute("SELECT name, email FROM users WHERE id = ?", (payload.client_id,)).fetchone()
+
+        gmail_conn = conn.execute(
+            "SELECT * FROM composio_connections WHERE user_id = ? AND toolkit = 'GMAIL' AND status = 'active'",
+            (current_user["id"],),
+        ).fetchone()
+        if not gmail_conn:
+            raise HTTPException(
+                status_code=400,
+                detail="Connect your Gmail account first, from Personal Settings.",
+            )
+
+        composio_api_key = _get_app_setting(conn, "composio_api_key")
+
+    dispatch = await _dispatch_composio_action(
+        actor_id=current_user["id"],
+        actor_role=current_user["role"],
+        action_name="GMAIL_SEND_EMAIL",
+        entity_id=f"client-{payload.client_id}",
+        params={"recipient_email": client["email"], "subject": payload.subject, "body": payload.body},
+        composio_api_key=composio_api_key,
+        connected_account_id=gmail_conn["connected_account_id"],
+    )
+
+    if not dispatch["ok"]:
+        raise HTTPException(status_code=502, detail=f"Gmail send failed: {dispatch['body']}")
+
+    # Also drop it into the client's own communications thread so it shows
+    # up in Contact Officer / Manage Client Messages, same as an in-app message.
+    with get_db() as conn:
+        conn.execute(
+            "INSERT INTO messages (client_id, sender_id, sender_role, body) VALUES (?, ?, ?, ?)",
+            (payload.client_id, current_user["id"], current_user["role"], f"[Sent via Gmail] {payload.subject}: {payload.body}"),
+        )
+
+    log_audit(current_user["id"], current_user["role"], "send_gmail", f"Sent real email to client {payload.client_id} ({client['email']})")
+    return {"message": "Email sent"}
 
 
 # --------------------------------------------------------------------------

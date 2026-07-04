@@ -452,16 +452,59 @@ async function loadGlobalSettings() {
 
   const geminiCard = document.getElementById("geminiSettingsCard");
   const composioSettingsCard = document.getElementById("composioSettingsCard");
+  const gmailAuthConfigCard = document.getElementById("gmailAuthConfigCard");
   if (state.user.role === "super_admin") {
     geminiCard.classList.remove("d-none");
     loadGeminiSettings();
     composioSettingsCard.classList.remove("d-none");
     loadComposioSettings();
+    gmailAuthConfigCard.classList.remove("d-none");
+    loadGmailAuthConfig();
   } else {
     geminiCard.classList.add("d-none");
     composioSettingsCard.classList.add("d-none");
+    gmailAuthConfigCard.classList.add("d-none");
   }
 }
+
+// ---- Gmail Auth Config ID (Super Admin only) --------------------------------
+async function loadGmailAuthConfig() {
+  const statusLine = document.getElementById("gmailAuthConfigStatusLine");
+  try {
+    const data = await api("/api/admin/settings/composio-gmail");
+    statusLine.innerHTML = data.configured
+      ? `<span class="text-accent">Configured</span> — <code>${data.auth_config_id}</code>, last updated ${data.updated_at}`
+      : `<span class="text-muted">Not configured yet.</span> Employees won't be able to connect Gmail until this is set.`;
+  } catch (err) {
+    statusLine.innerHTML = `<span class="text-danger">${err.message}</span>`;
+  }
+}
+
+document.getElementById("gmailAuthConfigForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const errorBox = document.getElementById("gmailAuthConfigError");
+  const successBox = document.getElementById("gmailAuthConfigSuccess");
+  errorBox.classList.add("d-none");
+  successBox.classList.add("d-none");
+
+  const authConfigId = document.getElementById("gmailAuthConfigInput").value.trim();
+  if (!authConfigId) {
+    errorBox.textContent = "Enter an auth_config_id to save.";
+    errorBox.classList.remove("d-none");
+    return;
+  }
+
+  try {
+    await api("/api/admin/settings/composio-gmail", { method: "POST", body: JSON.stringify({ auth_config_id: authConfigId }) });
+    document.getElementById("gmailAuthConfigForm").reset();
+    successBox.textContent = "Gmail auth config saved.";
+    successBox.classList.remove("d-none");
+    loadGmailAuthConfig();
+  } catch (err) {
+    errorBox.textContent = err.message;
+    errorBox.classList.remove("d-none");
+  }
+});
 
 // ---- Composio API key settings (Super Admin only) --------------------------
 async function loadComposioSettings() {
@@ -691,7 +734,43 @@ async function loadDataCleaner() {
 function loadPersonalSettings() {
   document.getElementById("personalSettingsName").textContent = state.user.name;
   document.getElementById("personalSettingsEmail").textContent = state.user.email;
+  loadGmailConnectStatus();
 }
+
+let gmailPollTimer = null;
+
+async function loadGmailConnectStatus() {
+  const statusLine = document.getElementById("gmailConnectStatusLine");
+  const btn = document.getElementById("connectGmailBtn");
+  try {
+    const data = await api("/api/integrations/gmail/status");
+    if (data.status === "active") {
+      statusLine.innerHTML = `<span class="text-accent">Connected</span> — you can send real email from any client's Manage panel.`;
+      btn.textContent = "Reconnect Gmail";
+    } else if (data.status === "pending") {
+      statusLine.innerHTML = `<span class="text-muted">Connection started — waiting for you to finish signing in with Google in the other tab…</span>`;
+      btn.textContent = "Connect Gmail";
+      if (!gmailPollTimer) gmailPollTimer = setInterval(loadGmailConnectStatus, 3000);
+    } else {
+      statusLine.innerHTML = `<span class="text-muted">Not connected yet.</span>`;
+      btn.textContent = "Connect Gmail";
+      if (gmailPollTimer) { clearInterval(gmailPollTimer); gmailPollTimer = null; }
+    }
+    if (data.status === "active" && gmailPollTimer) { clearInterval(gmailPollTimer); gmailPollTimer = null; }
+  } catch (err) {
+    statusLine.innerHTML = `<span class="text-danger">${err.message}</span>`;
+  }
+}
+
+document.getElementById("connectGmailBtn").addEventListener("click", async () => {
+  try {
+    const data = await api("/api/integrations/gmail/connect", { method: "POST" });
+    window.open(data.redirect_url, "_blank", "noopener");
+    loadGmailConnectStatus();
+  } catch (err) {
+    alert(err.message);
+  }
+});
 
 document.getElementById("changePasswordForm").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -1031,8 +1110,47 @@ document.querySelectorAll("#manageClientTabs .nav-link").forEach((btn) => {
     if (btn.dataset.tab === "invoices") loadManageInvoices();
     if (btn.dataset.tab === "documents") loadManageDocuments();
     if (btn.dataset.tab === "ai-suggestions") loadManageAiSuggestions();
-    if (btn.dataset.tab === "messages") loadMessageThread(manageClientId, "manageMessageThread");
+    if (btn.dataset.tab === "messages") {
+      loadMessageThread(manageClientId, "manageMessageThread");
+      loadGmailSendAvailability();
+    }
   });
+});
+
+async function loadGmailSendAvailability() {
+  const statusLine = document.getElementById("gmailSendStatusLine");
+  const form = document.getElementById("gmailSendForm");
+  try {
+    const data = await api("/api/integrations/gmail/status");
+    if (data.status === "active") {
+      statusLine.textContent = "";
+      form.classList.remove("d-none");
+    } else {
+      statusLine.innerHTML = `Connect your Gmail account in <strong>Personal Settings</strong> to send real email from here.`;
+      form.classList.add("d-none");
+    }
+  } catch (err) {
+    statusLine.innerHTML = `<span class="text-danger">${err.message}</span>`;
+    form.classList.add("d-none");
+  }
+}
+
+document.getElementById("gmailSendForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const subject = document.getElementById("gmailSendSubject").value.trim();
+  const body = document.getElementById("gmailSendBody").value.trim();
+  if (!subject || !body) return;
+
+  try {
+    await api("/api/dashboard/integrations/gmail/send", {
+      method: "POST",
+      body: JSON.stringify({ client_id: manageClientId, subject, body }),
+    });
+    document.getElementById("gmailSendForm").reset();
+    loadMessageThread(manageClientId, "manageMessageThread");
+  } catch (err) {
+    alert(err.message);
+  }
 });
 
 document.getElementById("generateAiReportBtn").addEventListener("click", async () => {
