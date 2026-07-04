@@ -1731,7 +1731,9 @@ async def connect_gmail(
     if resp.status_code >= 400:
         raise HTTPException(status_code=502, detail=f"Composio connection request failed: {body}")
 
-    connected_account_id = body.get("id")
+    # The /link response carries the pre-created account under
+    # "connected_account_id" (its top-level "id"-like field is the link token).
+    connected_account_id = body.get("connected_account_id")
     with get_db() as conn:
         conn.execute(
             """INSERT INTO composio_connections (user_id, toolkit, connected_account_id, status)
