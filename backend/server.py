@@ -54,6 +54,20 @@ app.add_middleware(
 
 app.include_router(api_router)
 
+
+# Frontend files change on every deploy but have no versioned filenames, so
+# make browsers revalidate instead of trusting heuristic caching: unchanged
+# files still get a cheap 304, changed ones arrive without a hard refresh.
+@app.middleware("http")
+async def revalidate_frontend_cache(request, call_next):
+    response = await call_next(request)
+    if request.url.path.startswith("/static") or request.url.path in (
+        "/", "/login", "/register", "/integrations/callback",
+    ):
+        response.headers["Cache-Control"] = "no-cache"
+    return response
+
+
 # Serve the frontend as static files so the whole app can run from one process.
 if FRONTEND_DIR.exists():
     app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
