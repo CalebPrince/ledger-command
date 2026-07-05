@@ -1148,6 +1148,11 @@ document.getElementById("gmailSendForm").addEventListener("submit", async (e) =>
   const body = document.getElementById("gmailSendBody").value.trim();
   if (!subject || !body) return;
 
+  const sendBtn = e.target.querySelector('button[type="submit"]');
+  const statusLine = document.getElementById("gmailSendStatusLine");
+  sendBtn.disabled = true;
+  sendBtn.textContent = "Sending…";
+
   try {
     await api("/api/dashboard/integrations/gmail/send", {
       method: "POST",
@@ -1155,8 +1160,13 @@ document.getElementById("gmailSendForm").addEventListener("submit", async (e) =>
     });
     document.getElementById("gmailSendForm").reset();
     loadMessageThread(manageClientId, "manageMessageThread");
+    statusLine.innerHTML = `<span class="text-accent"><i class="bi bi-check-circle me-1"></i>Email Sent!</span>`;
+    setTimeout(() => { if (statusLine.textContent.includes("Email Sent!")) statusLine.textContent = ""; }, 5000);
   } catch (err) {
-    alert(err.message);
+    statusLine.innerHTML = `<span class="text-danger">${err.message}</span>`;
+  } finally {
+    sendBtn.disabled = false;
+    sendBtn.innerHTML = `<i class="bi bi-envelope me-1"></i>Send via Gmail`;
   }
 });
 
