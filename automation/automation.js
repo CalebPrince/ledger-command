@@ -148,6 +148,13 @@ app.post("/api/v1/execute-action", requireActorIdentity, async (req, res) => {
         },
         body: JSON.stringify({
           connected_account_id: connected_account_id || undefined,
+          // Composio requires the link-time user identifier alongside the
+          // connected account (error 1811 otherwise). Accounts are linked
+          // with the app user's id (see routes.py connect_gmail), and the
+          // actor executing is always that same user. Sent under both the
+          // current and legacy field names Composio recognizes.
+          user_id: connected_account_id ? String(actorId) : undefined,
+          entity_id: connected_account_id ? String(actorId) : undefined,
           arguments: params || {},
         }),
       }
