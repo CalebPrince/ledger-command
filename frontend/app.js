@@ -65,7 +65,10 @@ async function api(path, options = {}) {
 
   const res = await fetch(API_BASE + path, { ...options, headers });
 
-  if (res.status === 401) {
+  // A 401 from the login attempt itself means bad credentials, not an
+  // expired session — let it fall through to the normal error path so the
+  // server's "Incorrect email or password" message reaches the user.
+  if (res.status === 401 && path !== "/api/auth/login") {
     logout();
     throw new Error("Session expired. Please sign in again.");
   }
