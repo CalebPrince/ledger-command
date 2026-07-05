@@ -24,6 +24,7 @@ const NAV_BY_ROLE = {
   super_admin: [
     { id: "dashboard", label: "Dashboard", icon: "bi-speedometer2", view: "view-dashboard" },
     { id: "users", label: "User Management", icon: "bi-people", view: "view-users" },
+    { id: "assigned-clients", label: "Clients", icon: "bi-person-badge", view: "view-assigned-clients" },
     { id: "audit", label: "Master Audit Logs", icon: "bi-journal-text", view: "view-audit" },
     { id: "settings", label: "Global Settings", icon: "bi-gear", view: "view-settings" },
     { id: "personal-settings", label: "Personal Settings", icon: "bi-sliders", view: "view-personal-settings" },
@@ -31,6 +32,7 @@ const NAV_BY_ROLE = {
   admin: [
     { id: "dashboard", label: "Dashboard", icon: "bi-speedometer2", view: "view-dashboard" },
     { id: "users", label: "User Management", icon: "bi-people", view: "view-users" },
+    { id: "assigned-clients", label: "Clients", icon: "bi-person-badge", view: "view-assigned-clients" },
     { id: "audit", label: "Master Audit Logs", icon: "bi-journal-text", view: "view-audit" },
     { id: "settings", label: "Global Settings", icon: "bi-gear", view: "view-settings" },
     { id: "personal-settings", label: "Personal Settings", icon: "bi-sliders", view: "view-personal-settings" },
